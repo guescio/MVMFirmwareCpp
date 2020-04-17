@@ -116,10 +116,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CircularBuffer.h" />
     <ClInclude Include="DebugIface.h" />
     <ClInclude Include="DriverContext.h" />
     <ClInclude Include="driver_5525DSO.h" />
     <ClInclude Include="driver_SFM3019.h" />
+    <ClInclude Include="driver_VenturiFlowMeter.h" />
     <ClInclude Include="fw_board_razzeto_v3.h" />
     <ClInclude Include="generic_definitions.h" />
     <ClInclude Include="HAL.h" />
@@ -129,9 +131,11 @@
     <ClInclude Include="__vm\.MVMFirmwareCore.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CircularBuffer.cpp" />
     <ClCompile Include="DebugIface.cpp" />
     <ClCompile Include="driver_5525DSO.cpp" />
     <ClCompile Include="driver_SFM3019.cpp" />
+    <ClCompile Include="driver_VenturiFlowMeter.cpp" />
     <ClCompile Include="fw_board_razzeto_v3.cpp" />
     <ClCompile Include="HAL.cpp" />
     <ClCompile Include="hw.cpp" />

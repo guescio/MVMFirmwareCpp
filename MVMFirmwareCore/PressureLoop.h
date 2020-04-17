@@ -3,6 +3,9 @@
 #ifndef _PRESSURELOOP_h
 #define _PRESSURELOOP_h
 #include "generic_definitions.h"
+#include "hw.h"
+#include "DebugIface.h"
+#include "DriverContext.h"
 
 class PressureLoopClass
 {
@@ -10,8 +13,12 @@ class PressureLoopClass
 
 
  public:
-	void init(int32_t LoopRatio);
+    void Init(float fast_ms, int32_t LoopRatio, void *handle);
+
     void Tick();
+    void PID_SLOW_LOOP();
+    void PID_FAST_LOOP();
+    float GetValveControl();
     void SetPressure(t_pressure_selector ps, float pressure);
     void SetTargetPressure(float pressure);
     void ConfigurePidSlow(float P, float I, float D);
@@ -20,6 +27,7 @@ class PressureLoopClass
     void GetPidFast(float *P, float *I, float *D);
     void SetPidFilter(float fast, float slow);
     void GetPidFilter(float *fast, float *slow);
+    void GetPidMonitor(float* slow, float* fast);
 
 private:
     float _PID_P2;
@@ -47,8 +55,12 @@ private:
 
     float _ValvePWM;
 
-    void PID_SLOW_LOOP();
-    void PID_FAST_LOOP();
+    float _fast_ms;
+    
+    HW* hwi;
+    DebugIfaceClass* dbg;
+
+    uint64_t cycle_Loop_LT;
 };
 
 

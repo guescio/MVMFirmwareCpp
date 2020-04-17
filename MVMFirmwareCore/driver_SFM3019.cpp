@@ -103,7 +103,8 @@ int8_t SensorSFM3019::sensirion_common_check_crc(uint8_t* data, uint16_t count,
 
 int16_t SensorSFM3019::sensirion_i2c_general_call_reset(void) {
     const uint8_t data = 0x06;
-    return sensirion_i2c_write(0, &data, (uint16_t)sizeof(data));
+    hwi->I2CWrite(IIC_GENERAL_CALL_SENSIRION, (uint8_t *)&data, (uint16_t)sizeof(data), true);
+    return 0;
 }
 
 uint16_t SensorSFM3019::sensirion_fill_cmd_send_buf(uint8_t* buf, uint16_t cmd,
@@ -216,7 +217,8 @@ int8_t SensorSFM3019::sensirion_i2c_read(uint8_t address, uint8_t* data, uint16_
     uint8_t readData[32];
     uint8_t rxByteCount = 0;
 
-    hwi->I2CRead(address, readData, count,true);
+    
+    hwi->I2CRead(i2c_device, readData, count,true);
   
     memcpy(data, readData, count);
 
@@ -225,7 +227,9 @@ int8_t SensorSFM3019::sensirion_i2c_read(uint8_t address, uint8_t* data, uint16_
 
 int8_t SensorSFM3019::sensirion_i2c_write(uint8_t address, const uint8_t* data,
     uint16_t count) {
-    hwi->I2CWrite(address, (uint8_t*)data, count, true);
+  
+
+    hwi->I2CWrite(i2c_device, (uint8_t*)data, count, true);
 
 
     return 0;
@@ -382,8 +386,17 @@ SfmConfig SensorSFM3019::sfm3019_create(void) {
 
 
 
-bool SensorSFM3019::Init()
+bool SensorSFM3019::Init(t_i2cdevices device, void* hw_handle)
 {
+
+    DriverContext* dc;
+    dc = (DriverContext*)hw_handle;
+    hwi = (HW*)dc->hwi;
+    dbg = (DebugIfaceClass*)dc->dbg;
+    i2c_address = 0x2e;
+    i2c_device = device;
+
+    _initialized = false;
     const char* driver_version = sfm_common_get_driver_version();
     if (driver_version) {
         dbg->DbgPrint(DBG_KERNEL, DBG_INFO, "SFM driver version " + String(driver_version));
@@ -438,16 +451,9 @@ bool SensorSFM3019::Init()
     /* Wait for the first measurement to be available. Wait for
      * SFM3019_MEASUREMENT_WARM_UP_TIME_US instead for more reliable results */
     hwi->__delay_blocking_ms(100);
-    return true;
-}
 
-SensorSFM3019::SensorSFM3019(uint8_t address, void* hw_handle)
-{
-    DriverContext* dc;
-    dc = (DriverContext*)hw_handle;
-    hwi = (HW*)dc->hwi;
-    dbg = (DebugIfaceClass*)dc->dbg;
-    i2c_address = address;
+    _initialized = true;
+    return true;
 }
 
 
@@ -457,6 +463,8 @@ bool SensorSFM3019::doMeasure(float* Flow, float* T)
     int16_t temperature_raw;
     uint16_t status;
     int16_t error;
+    if (!_initialized) return false;
+
     error = sfm_common_read_measurement_raw(&sfm3019, &flow_raw,
         &temperature_raw, &status);
     if (error) {
@@ -473,6 +481,16 @@ bool SensorSFM3019::doMeasure(float* Flow, float* T)
         }
         *T = sfm_common_convert_temperature_float(temperature_raw);
         *Flow = flow;
+        Integral += flow;
         //Serial.println("Flow: " + String(flow)  + " flow_raw: " + String(flow_raw) + " T: " +String(temperature) + " Traw: " +String(temperature_raw) + " status: " + String(status));
     }
+}
+
+float SensorSFM3019::GetIntegral()
+{
+    return Integral;
+}
+void SensorSFM3019::ResetIntegral()
+{
+    Integral = 0;
 }

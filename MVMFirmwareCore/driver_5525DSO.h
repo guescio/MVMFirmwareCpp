@@ -18,16 +18,15 @@ typedef enum { OVS_256, OVS_512, OVS_1024, OVS_2048, OVS_4096 } t_ps_resolution;
 	{
 		public:
 
-
-			Sensor5525DSO(uint8_t address, t_ps_sensor model, t_ps_resolution ps_resolution, void *hw_handle);
 			
-			bool Init();
+			bool Init(t_i2cdevices device, t_ps_sensor model, t_ps_resolution ps_resolution, void* hw_handle);
 			bool doMeasure(float* P, float* T);
 
 			bool asyncMeasure();
 			bool asyncGetResult(float *P, float *T);
 
 			void setZero(float value);
+			float GetConversionDelay();
 
 		private:
 			typedef struct
@@ -39,7 +38,7 @@ typedef enum { OVS_256, OVS_512, OVS_1024, OVS_2048, OVS_4096 } t_ps_resolution;
 
 
 			t_5525DSO_calibration_table sensorCT;
-			uint8_t i2c_address;
+			t_i2cdevices i2c_device;
 			t_ps_sensor sensor_model;
 			t_ps_resolution sensor_resolution;
 			
@@ -62,6 +61,8 @@ typedef enum { OVS_256, OVS_512, OVS_1024, OVS_2048, OVS_4096 } t_ps_resolution;
 			//float PBuffer[PBUFFER_SIZE];
 			int startup_counter;
 			bool data_valid;
+
+			bool _initialized = false;
 	};
 
 #endif

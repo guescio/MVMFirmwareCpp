@@ -34,22 +34,22 @@ class SensorSFM3019
 public:
 
 
-	SensorSFM3019(uint8_t address,  void* hw_handle);
-
-	bool Init();
+	bool Init(t_i2cdevices device, void* hw_handle);
     bool doMeasure(float* Flow, float* T);
+    float GetIntegral();
+    void ResetIntegral();
 
 private:
 
 	uint8_t i2c_address;
-
+    t_i2cdevices i2c_device;
 
 
 	HW* hwi;
 	DebugIfaceClass* dbg;
 
-  
-
+    float Integral;
+    bool _initialized = false;
 
     /**
      * Return the driver version

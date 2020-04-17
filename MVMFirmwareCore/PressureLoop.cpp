@@ -4,8 +4,15 @@
 
 #include "PressureLoop.h"
 
-void PressureLoopClass::init(int32_t LoopRatio)
+void PressureLoopClass::Init(float fast_ms, int32_t LoopRatio, void* handle)
 {
+    DriverContext* dc;
+    dc = (DriverContext*)handle;
+    hwi = (HW*)dc->hwi;
+    dbg = (DebugIfaceClass*)dc->dbg;
+
+    cycle_Loop_LT = hwi->GetMillis();
+    _fast_ms = fast_ms;
     _LoopRatio = LoopRatio;
     LoopCounter = 0;
     _PID_P = 70;
@@ -19,6 +26,7 @@ void PressureLoopClass::init(int32_t LoopRatio)
     _filter_slow = 0.7;
     _ValvePWM = 0;
 }
+
 
 
 void PressureLoopClass::PID_SLOW_LOOP()
@@ -95,7 +103,7 @@ void PressureLoopClass::PID_FAST_LOOP()
         Pset2 = Pmeas;
         pid_integral = 0;
         pid_prec = 0;
-        ledcWrite(0, 0);
+        _ValvePWM = 0;
     }
     else {
         Pset2 = (Pset2 * _filter_fast) + ((1- _filter_fast) * fast_pid_set);
@@ -103,10 +111,10 @@ void PressureLoopClass::PID_FAST_LOOP()
 
         pid_error = Pset2 - Pmeas;
         pid_integral += pid_error;
-        if ((pid_integral * PID_I) > 4095)
-            pid_integral = (4095 / PID_I);
-        if ((pid_integral * PID_I) < -4095)
-            pid_integral = -(4095 / PID_I);
+        if ((pid_integral * PID_I) > 4095.0)
+            pid_integral = (4095.0 / PID_I);
+        if ((pid_integral * PID_I) < -4095.0)
+            pid_integral = -(4095.0 / PID_I);
 
         pid_out = PID_P * pid_error + PID_I * pid_integral + PID_D * (pid_error - pid_prec);
 
@@ -114,16 +122,16 @@ void PressureLoopClass::PID_FAST_LOOP()
         pid_outb = pid_out;
         if (pid_outb < 0)
             pid_outb = 0;
-        pid_outb = pid_outb + 500;
-        if (pid_outb > 4090)
-            pid_outb = 4090;
+
+        if (pid_outb > 4095.0)
+            pid_outb = 4095.0;
 
         pid_prec = pid_error;
 
         if (_Pset == 0)
-            ledcWrite(0, 0);
+            _ValvePWM = 0;
         else
-            ledcWrite(0, pid_outb);
+            _ValvePWM =  pid_outb*100.0/4095;
     }
 
    
@@ -136,22 +144,26 @@ void PressureLoopClass::SetTargetPressure(float pressure)
 
 void PressureLoopClass::Tick()
 {
-    if (_LoopRatio == 0)
+    if (hwi->Get_dT_millis(cycle_Loop_LT) >= _fast_ms)
     {
-        PID_FAST_LOOP();
-        PID_SLOW_LOOP();
-    }
-    else
-    {
-        if (LoopCounter >= _LoopRatio)
+        cycle_Loop_LT = hwi->GetMillis();
+        if (_LoopRatio == 0)
         {
             PID_FAST_LOOP();
-            LoopCounter = 0;
+            PID_SLOW_LOOP();
         }
         else
         {
-            PID_SLOW_LOOP();
-            LoopCounter++;
+            if (LoopCounter >= _LoopRatio)
+            {
+                PID_FAST_LOOP();
+                LoopCounter = 0;
+            }
+            else
+            {
+                PID_SLOW_LOOP();
+                LoopCounter++;
+            }
         }
     }
 }
@@ -205,4 +217,15 @@ void PressureLoopClass::GetPidFilter(float* fast, float* slow)
 {
     *fast = _filter_fast;
     *slow = _filter_slow;
+}
+
+float PressureLoopClass::GetValveControl()
+{
+    return _ValvePWM;
+}
+
+void PressureLoopClass::GetPidMonitor(float* slow, float* fast)
+{
+    *fast = _ValvePWM;
+    *slow = fast_pid_set;
 }

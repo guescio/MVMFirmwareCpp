@@ -30,7 +30,7 @@ private:
 
 
  public:
-	DebugIfaceClass(verbose_level _vs, HW *_hwi);
+	void Init(verbose_level _vs, HW *_hwi);
 	void SetVerboseLevel(verbose_level _vs);
 	void DbgPrint(dbg_source source, verbose_level vl, String s);
 
