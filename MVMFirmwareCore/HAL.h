@@ -10,6 +10,7 @@
 #endif
 
 #include "fw_board_razzeto_v3.h"
+#include "fw_board_ni_v4.h"
 #include "DebugIface.h"
 #include "driver_5525DSO.h"
 #include "driver_SFM3019.h"
@@ -20,7 +21,7 @@
 class HAL
 {
 	private:
-		HW_V3 hwi;
+		HW_V4 hwi;
 		Sensor5525DSO drv_PLoop;
 		Sensor5525DSO drv_PPatient;
 		Sensor5525DSO drv_PVenturi;

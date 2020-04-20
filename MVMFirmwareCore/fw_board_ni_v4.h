@@ -1,24 +1,21 @@
-// fw_board_razzeto_v3.h
+// fw_board_ni_v4.h
 
-#ifndef _FW_BOARD_RAZZETO_V3_h
-#define _FW_BOARD_RAZZETO_V3_h
+#ifndef _FW_BOARD_NI_V4_h
+#define _FW_BOARD_NI_V4_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"    
-   
+	#include "arduino.h"
 #else
 	#include "WProgram.h"
 #endif
 
-#include "hw.h"  
-#include <functional>
+#include "hw.h"
 
+#define IIC_COUNT 8
 
-    #define IIC_COUNT 6
-
-class HW_V3 :  public HW {
+class HW_V4 : public HW {
 public:
-    
+
 
     bool Init();
     bool I2CWrite(t_i2cdevices device, uint8_t* wbuffer, int wlength, bool stop);
@@ -36,18 +33,18 @@ public:
     bool DataAvailableOnUART0();
     String ReadUART0UntilEOL();
     bool WriteUART0(String s);
-   
+
 
 private:
     void __service_i2c_detect();
     void i2c_MuxSelect(uint8_t i);
     t_i2cdev GetIICDevice(t_i2cdevices device);
 
-  
+
     t_i2cdev iic_devs[IIC_COUNT];
     uint8_t current_muxpos = 10;
 
-    
+
 };
 
 

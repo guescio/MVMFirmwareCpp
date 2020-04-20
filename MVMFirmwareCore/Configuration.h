@@ -47,5 +47,7 @@ typedef struct
     bool __ADDTimeStamp;
     bool __WDENABLE;
 
+    bool pcv_trigger_enable;
+    float pcv_trigger;
     
 } t_config;

@@ -36,9 +36,6 @@
     <ClInclude Include="driver_5525DSO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="hw.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="generic_definitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -60,6 +57,24 @@
     <ClInclude Include="CircularBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="hw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MVM_StateMachine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MVMCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Configuration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fw_board_ni_v4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HAL.cpp">
@@ -72,9 +87,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="driver_5525DSO.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="hw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DebugIface.cpp">
@@ -90,6 +102,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CircularBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MVM_StateMachine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MVMCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fw_board_ni_v4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

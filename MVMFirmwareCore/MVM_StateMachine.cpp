@@ -90,10 +90,7 @@ void MVM_StateMachine::SMExecute()
                     if (core_config->backup_enable)
                     {
                         float dt = millis() - last_start;
-                        float dr = 60000.0;
-                        if (dt != 0)
-                            dr = 60000.0 / dt;
-                        if (dr < core_config->backup_min_rate)
+                        if (dt / 1000.0 > core_config->backup_min_rate)
                         {
                             backup_trigger = true;
                         }
@@ -188,14 +185,31 @@ void MVM_StateMachine::SMExecute()
                 MVM_HAL->SetOutputValve(false);
             }
         }
+        else
+        {
+            if (timer1 >= (700 / dT)) {
+
+                if (core_config->pcv_trigger_enable)
+                {
+                    if (((-1.0 * sys_c->PPatient_delta2) > core_config->assist_pressure_delta_trigger) && (sys_c->PPatient_delta < 0)) {
+                        //StatEndCycle();
+                        MVM_HAL->SetInputValve(core_config->pause_lg_p);
+                        MVM_HAL->SetOutputValve(false);
+
+                    }
+                }
+            }
+        }
         break;
 
     case AST_WAIT_MIN_INHALE_TIME:
         dbg_state_machine = 3;
         if (timer1 > 300 / dT) {
-            if (sys_c->pPatient >= core_config->target_pressure * 0.5) {
+            if ((sys_c->pPatient >= core_config->target_pressure * 0.5) 
+                    || (timer1 > 1000 / dT) ){
                 mvm_sm = AST_WAIT_FLUX_DROP;
                 MVM_HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "SM: AST_WAIT_FLUX_DROP");
+                timer1 = 0;
             }
         }
         break;
@@ -203,7 +217,8 @@ void MVM_StateMachine::SMExecute()
     case AST_WAIT_FLUX_DROP:
         dbg_state_machine = 4;
 
-        if (sys_c->FlowIn  <= (core_config->flux_close * sys_c->fluxpeak) / 100.0) {
+        if ((sys_c->FlowIn  <= (core_config->flux_close * sys_c->fluxpeak) / 100.0)
+            || (timer1 > 6000 / dT) ){
             last_isp_time = timer1;
             mvm_sm = AST_WAIT_FLUX_DROP_b;
             MVM_HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "SM: AST_WAIT_FLUX_DROP_b");
@@ -238,7 +253,12 @@ void MVM_StateMachine::SMExecute()
 
     case AST_DEADTIME:
         dbg_state_machine = 6;
-        if (timer1 >= last_isp_time) {
+        float dead_time_s;
+        float dead_time_s;
+        dead_time_s = 0.5 * last_isp_time;
+        dead_time_s = dead_time_s > 400/dT ? dead_time_s : 400 / dT;
+        dead_time_s = dead_time_s > 2000 / dT ? 2000 / dT : dead_time_s;
+        if (timer1 >= dead_time_s) {
             if (core_config->pause_exhale == false) {
                 mvm_sm = FR_OPEN_INVALVE;
                 MVM_HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "SM: FR_OPEN_INVALVE");
@@ -259,7 +279,7 @@ void MVM_StateMachine::SMExecute()
             if (((-1.0 * sys_c->PPatient_delta2) > core_config->assist_pressure_delta_trigger) && (sys_c->PPatient_delta < 0)) {
                 //PRES_SENS_CT[2].ZERO += dt_veturi_100ms;
                 MVM_HAL->SetInputValve(0);
-                MVM_HAL->SetOutputValve(true);
+                MVM_HAL->SetOutputValve(false);
                 mvm_sm = AST_PAUSE_EXHALEb;
                 MVM_HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "SM: AST_PAUSE_EXHALEb");
             }

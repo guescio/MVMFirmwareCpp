@@ -70,6 +70,12 @@ void HAL::Tick()
 
 	}
 	else
+	if (hwi.Get_dT_millis(cycle_PVenturi_LT) > 20)
+	{
+		cycle_PVenturi_LT = hwi.GetMillis();
+		drv_PVenturi.asyncMeasure();
+	}
+	else
 	if (drv_PLoop.asyncGetResult(&Ploop, &Tloop))
 	{
 		MEM_PLoop->PushData(Ploop);
@@ -87,7 +93,13 @@ void HAL::Tick()
 		if (callback_ppatient)
 			callback_ppatient();
 	}
-
+	else
+	if (drv_PVenturi.asyncGetResult(&Pventuri, &Tventuri))
+	{
+		FlowVenturi = drv_FlowVenturi.GetFlow(Pventuri, Tventuri);
+		MEM_FlowVenturi->PushData(FlowVenturi);
+		dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - PVenturi: " + String(Pventuri) + " - FlowVenturi: " + String(FlowVenturi));
+	}
 	/*if (hwi->Get_dT_millis(cycle_PVenturi_LT) > 20)
 	{
 		cycle_PVenturi_LT = hwi->GetMillis();
