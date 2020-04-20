@@ -6,6 +6,8 @@
 
 // the setup function runs once when you press reset or power the board
 
+#include "TidalVolume.h"
+#include "Alarms.h"
 #include "MVM_StateMachine.h"
 #include "ConfigManager.h"
 #include "MVMCore.h"

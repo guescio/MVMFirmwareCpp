@@ -33,12 +33,15 @@ class HAL
 		CircularBuffer *MEM_PPatient;
 		CircularBuffer *MEM_FlowIn;
 		CircularBuffer *MEM_FlowVenturi;
+		CircularBuffer* MEM_PVenturi;
 
 
 		uint64_t cycle_PLoop_LT;
 		uint64_t cycle_PPatient_LT;
 		uint64_t cycle_PVenturi_LT;
 		uint64_t cycle_FlowIn_LT;
+		uint64_t cycle_ADC_LT;
+		uint64_t cycle_Supervisor_LT;
 		float Tloop, Ploop;
 		float Tpatient, Ppatient;
 		float FlowIn, TFlowIn;
@@ -52,6 +55,7 @@ class HAL
 		float GetPressurePatient(int32_t Delay);
 		float GetFlowInspire(int32_t Delay);
 		float GetFlowVenturi(int32_t Delay);
+		float GetPVenturi(int32_t Delay);
 		void SetInputValve(float value);
 		void SetOutputValve(bool value);
 		void GetInputValvePID(float *pid_slow, float *pid_fast);

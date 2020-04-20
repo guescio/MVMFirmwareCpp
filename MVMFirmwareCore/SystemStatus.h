@@ -1,16 +1,5 @@
 #pragma once
 
-typedef struct
-{
-    float FLUX;
-    float TidalVolume;
-    float InspVolumeSensirion;
-    float InspVolumeVenturi;
-    float TidalCorrection;
-    int TidalStatus;
-    float ExpVolumeVenturi;
-    float AutoZero;
-} t_tidal_volume_c;
 
 
 typedef struct
@@ -59,7 +48,7 @@ typedef struct
     float pPatient_low_passed;
 	float FlowIn;
 	float FlowVenturi;
-    t_tidal_volume_c tVolume;
+    
 
     float last_O2 = 21.7;
     float last_peep = 0;
@@ -74,6 +63,9 @@ typedef struct
     float currentTvIsnp = 0;
     float currentTvEsp = 0;
     float currentVM = 0;
+    float TidalVolume = 0;
+    float VenturiFlux = 0;
+    float Flux = 0;
 
 
     float PPatient_delta;
@@ -95,4 +87,6 @@ typedef struct
 
     uint32_t ALARM_FLAG;
     uint32_t WARNING_FLAG;
+
+    bool in_over_pressure_emergency;
 } t_SystemStatus;

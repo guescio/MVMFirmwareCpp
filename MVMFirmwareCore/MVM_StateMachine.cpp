@@ -47,13 +47,13 @@ void MVM_StateMachine::SMExecute()
         if (core_config->run) {
             //RUN RESPIRATORY
             if (core_config->BreathMode == M_BREATH_FORCED) {
+
+                if (callback_NewCycle)
+                    callback_NewCycle();
                 //AUTOMATIC
                 //PRES_SENS_CT[2].ZERO += dt_veturi_100ms;
 
 
-                if (sys_c->tVolume.TidalCorrection > 0) {
-                    sys_c->currentTvEsp = -1.0 * sys_c->tVolume.ExpVolumeVenturi / sys_c->tVolume.TidalCorrection;
-                }
 
                 //ResetStats();
                 //TidalReset();
@@ -80,6 +80,12 @@ void MVM_StateMachine::SMExecute()
             else {
                 //ASSISTED
                 if (core_config->BreathMode == M_BREATH_ASSISTED) {
+                    if (callback_EndCycle)
+                        callback_EndCycle();
+
+                    if (callback_NewCycle)
+                        callback_NewCycle();
+
                     sys_c->pres_peak = 0;
                     MVM_HAL->SetOutputValve(true);
  
@@ -98,9 +104,7 @@ void MVM_StateMachine::SMExecute()
                     if ((((-1.0 * sys_c->PPatient_delta2) > core_config->assist_pressure_delta_trigger) && (sys_c->PPatient_delta < 0)) || (backup_trigger == true)) {
                         sys_c->dbg_trigger = 1;
                         //PRES_SENS_CT[2].ZERO += dt_veturi_100ms;
-                        if (sys_c->tVolume.TidalCorrection > 0) {
-                            sys_c->currentTvEsp = -1.0 * sys_c->tVolume.ExpVolumeVenturi / sys_c->tVolume.TidalCorrection;
-                        }
+
                         //StatEndCycle();
                         //ResetStats();
                         //TidalReset();
@@ -145,12 +149,15 @@ void MVM_StateMachine::SMExecute()
         if (timer1 >= (core_config->inhale_ms / dT)) {
             if ((core_config->pause_inhale == false) && (core_config->pause_lg == false)) {
                 timer1 = 0;
+
+                if (callback_Exhale)
+                    callback_Exhale();
+
                 //TidalExhale();
                 //StatPhaseExpire();
 
                 sys_c->currentP_Peak = sys_c->pres_peak;
-                sys_c->currentTvIsnp = sys_c->tVolume.InspVolumeSensirion;
-                sys_c->currentVM = sys_c->fluxpeak;
+              
 
                 MVM_HAL->SetInputValve(0);
                 MVM_HAL->SetOutputValve(true);
@@ -176,6 +183,8 @@ void MVM_StateMachine::SMExecute()
 
         if (timer1 >= (core_config->exhale_ms / dT)) {
             if (core_config->pause_exhale == false) {
+                if (callback_EndCycle)
+                    callback_EndCycle();
                 //StatEndCycle();
                 MVM_HAL->SetOutputValve(false);
                 mvm_sm = FR_OPEN_INVALVE;
@@ -193,9 +202,10 @@ void MVM_StateMachine::SMExecute()
                 {
                     if (((-1.0 * sys_c->PPatient_delta2) > core_config->assist_pressure_delta_trigger) && (sys_c->PPatient_delta < 0)) {
                         //StatEndCycle();
-                        MVM_HAL->SetInputValve(core_config->pause_lg_p);
+                        if (callback_EndCycle)
+                            callback_EndCycle();
                         MVM_HAL->SetOutputValve(false);
-
+                        mvm_sm = FR_OPEN_INVALVE;
                     }
                 }
             }
@@ -232,8 +242,6 @@ void MVM_StateMachine::SMExecute()
             //TidalExhale();
             //StatPhaseExpire();
             sys_c->currentP_Peak = sys_c->pres_peak;
-            sys_c->currentTvIsnp = sys_c->tVolume.InspVolumeSensirion;
-            sys_c->currentVM = sys_c->fluxpeak;
             MVM_HAL->SetInputValve(0);
             MVM_HAL->SetOutputValve(true);
             mvm_sm = AST_DEADTIME;
@@ -253,7 +261,6 @@ void MVM_StateMachine::SMExecute()
 
     case AST_DEADTIME:
         dbg_state_machine = 6;
-        float dead_time_s;
         float dead_time_s;
         dead_time_s = 0.5 * last_isp_time;
         dead_time_s = dead_time_s > 400/dT ? dead_time_s : 400 / dT;

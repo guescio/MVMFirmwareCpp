@@ -1,5 +1,5 @@
 #pragma once
-#define DATA_BUFFER_SIZE 4
+
 #include <stdint.h>
 typedef enum { PWM_PV1 } hw_pwm;
 typedef enum { GPIO_PV2, GPIO_BUZZER, GPIO_LED, GPIO_RELEALLARM } hw_gpio;
@@ -37,3 +37,8 @@ typedef struct
 #define __ERROR_ALARM_PI 29
 #define __ERROR_WDOG_PI 30
 #define __ERROR_SYSTEM_FALIURE 31
+
+
+//SAFETY LIMITS
+#define PV1_SAFETY_LIMIT	70
+#define PV2_SAFETY_LIMIT	50

@@ -75,6 +75,9 @@
     <ClInclude Include="fw_board_ni_v4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Alarms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HAL.cpp">
@@ -114,6 +117,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="fw_board_ni_v4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Alarms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

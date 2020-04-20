@@ -12,6 +12,8 @@
 #include "ConfigManager.h"
 #include "HAL.h"
 #include "MVM_StateMachine.h"
+#include "Alarms.h"
+#include "TidalVolume.h"
 
 class MVMCore
 {
@@ -23,19 +25,33 @@ public:
 	bool WriteUART0(String s);
 	bool SetParameter(String p, String v);
 	String GetParameter(String p);
-
+	
+	
 private:
 	void InitConfiguration();
 	HAL MVM_HAL;
 	ConfigManagerClass CMC;
 	t_SystemStatus sys_s;
+	AlarmClass Alarms;
+	TidalVolumeClass TidalVolumeExt;
 
 	CircularBuffer  *MEM_Ppatient_LP;
 	MVM_StateMachine MVM_SM;
+	
+
 	float old_delta_ppatient;
+	
+	uint64_t last_respiratory_act;
 
 	void PPatient_Event();
 	void FlowIn_Event();
+	void PLoop_Event();
+	void FlowVenturi_Event();
+
+
+	void NewCycle_Event();
+	void Exhale_Event();
+	void EndCycle_Event();
 };
 #endif
 

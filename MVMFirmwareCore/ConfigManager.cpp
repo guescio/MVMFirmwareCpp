@@ -272,7 +272,7 @@ String ConfigManagerClass::GetParameter(String p)
     }
 
     if (strPatam == "tidal") {
-        return "valore=" + String(sys_s->tVolume.TidalVolume);
+        return "valore=" + String(sys_s->TidalVolume);
     }
 
     if (strPatam == "peep") {
@@ -349,10 +349,10 @@ String ConfigManagerClass::GetParameter(String p)
     }
     if (strPatam == "all") {
         return "valore=" + String(sys_s->pPatient) 
-            + "," + String(sys_s->tVolume.FLUX)
+            + "," + String(sys_s->Flux)
             + "," + String(sys_s->last_O2)
             + "," + String(sys_s->last_bpm)
-            + "," + String(sys_s->tVolume.TidalVolume) 
+            + "," + String(sys_s->TidalVolume) 
             + "," + String(sys_s->last_peep)
             + "," + String(sys_s->GasTemperature) 
             + "," + String(sys_s->batteryPowered ? 1 : 0) 

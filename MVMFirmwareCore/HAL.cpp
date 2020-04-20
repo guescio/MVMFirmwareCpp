@@ -2,6 +2,16 @@
 // 
 // 
 
+
+#define SCHEDULER_TIMER_PLOOP			5
+#define SCHEDULER_TIMER_PPATIENT		20
+#define SCHEDULER_TIMER_FLOWIN			20
+#define SCHEDULER_TIMER_PVENTURI		20
+#define SCHEDULER_TIMER_ADC				1000
+#define SCHEDULER_TIMER_SUPERVISOR		1000
+
+
+
 #include "HAL.h"
 #include "fw_board_razzeto_v3.h"
 #include <functional>
@@ -21,15 +31,18 @@ void HAL::Init()
 	drv_FlowIn.Init(IIC_FLOW1, &_dc);
 	PressureLoop.Init(2, 10, &_dc);
 
-	MEM_PLoop = new CircularBuffer(DATA_BUFFER_SIZE);
-	MEM_PPatient = new CircularBuffer(DATA_BUFFER_SIZE);
-	MEM_FlowIn = new CircularBuffer(DATA_BUFFER_SIZE);
-	MEM_FlowVenturi = new CircularBuffer(DATA_BUFFER_SIZE);
+	MEM_PLoop = new CircularBuffer(4);
+	MEM_PPatient = new CircularBuffer(4);
+	MEM_FlowIn = new CircularBuffer(4);
+	MEM_FlowVenturi = new CircularBuffer(4);
+	MEM_PVenturi = new CircularBuffer(8);
 
 	cycle_PLoop_LT = hwi.GetMillis();
 	cycle_PPatient_LT = hwi.GetMillis();
 	cycle_FlowIn_LT = hwi.GetMillis();
 	cycle_PVenturi_LT = hwi.GetMillis();
+	cycle_ADC_LT = hwi.GetMillis();
+	cycle_Supervisor_LT = hwi.GetMillis();
 
 	//hwi->addHandler(std::bind(&HAL::Callback, this, 1));
 }
@@ -39,21 +52,20 @@ void HAL::Callback(int x)
 	dbg->DbgPrint(DBG_CODE, DBG_CRITICAL, String((int32_t)hwi->GetMillis()) + " - CALLBACK CALLED " + String(x));
 }*/
 
-
 void HAL::Tick()
 {
 	hwi.Tick();
 	PressureLoop.Tick();
 	hwi.PWMSet(PWM_PV1,PressureLoop.GetValveControl());
 	
-	if (hwi.Get_dT_millis(cycle_PLoop_LT)> 5)
+	if (hwi.Get_dT_millis(cycle_PLoop_LT)> SCHEDULER_TIMER_PLOOP)
 	{
 		cycle_PLoop_LT = hwi.GetMillis();
 		drv_PLoop.asyncMeasure();
 		dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - Start Measure");
 	}
 	else
-	if (hwi.Get_dT_millis(cycle_FlowIn_LT) > 20)
+	if (hwi.Get_dT_millis(cycle_FlowIn_LT) > SCHEDULER_TIMER_FLOWIN)
 	{		
 		cycle_FlowIn_LT = hwi.GetMillis();
 		drv_FlowIn.doMeasure(&FlowIn, &TFlowIn);
@@ -63,17 +75,28 @@ void HAL::Tick()
 			callback_flowsens();
 	}
 	else
-	if (hwi.Get_dT_millis(cycle_PPatient_LT) > 20)
+	if (hwi.Get_dT_millis(cycle_PPatient_LT) > SCHEDULER_TIMER_PPATIENT)
 	{
 		cycle_PPatient_LT = hwi.GetMillis();
 		drv_PPatient.asyncMeasure();
 
 	}
 	else
-	if (hwi.Get_dT_millis(cycle_PVenturi_LT) > 20)
+	if (hwi.Get_dT_millis(cycle_PVenturi_LT) > SCHEDULER_TIMER_PVENTURI)
 	{
 		cycle_PVenturi_LT = hwi.GetMillis();
 		drv_PVenturi.asyncMeasure();
+	}
+	else
+	if (hwi.Get_dT_millis(cycle_ADC_LT) > SCHEDULER_TIMER_ADC)
+	{
+		cycle_ADC_LT = hwi.GetMillis();
+
+	}
+	else
+	if (hwi.Get_dT_millis(cycle_Supervisor_LT) > SCHEDULER_TIMER_SUPERVISOR)
+	{
+		cycle_Supervisor_LT = hwi.GetMillis();
 	}
 	else
 	if (drv_PLoop.asyncGetResult(&Ploop, &Tloop))
@@ -98,22 +121,15 @@ void HAL::Tick()
 	{
 		FlowVenturi = drv_FlowVenturi.GetFlow(Pventuri, Tventuri);
 		MEM_FlowVenturi->PushData(FlowVenturi);
+		MEM_PVenturi->PushData(Pventuri);
 		dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - PVenturi: " + String(Pventuri) + " - FlowVenturi: " + String(FlowVenturi));
+		if (callback_venturi)
+			callback_venturi();
 	}
-	/*if (hwi->Get_dT_millis(cycle_PVenturi_LT) > 20)
+	else
 	{
-		cycle_PVenturi_LT = hwi->GetMillis();
-		drv_PVenturi->asyncMeasure();
-	}*/
-	
-
-
-	/*if (drv_PVenturi->asyncGetResult(&Pventuri, &Tventuri))
-	{
-		FlowVenturi=drv_FlowVenturi->GetFlow(Pventuri, Tventuri);
-		MEM_FlowVenturi->PushData(FlowVenturi);
-		dbg->DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi->GetMillis()) + " - PVenturi: " + String(Pventuri) + " - FlowVenturi: " + String(FlowVenturi));
-	}*/
+		//ADC GET
+	}
 
 }
 
@@ -133,6 +149,10 @@ float HAL::GetFlowInspire(int32_t Delay)
 float HAL::GetFlowVenturi(int32_t Delay)
 {
 	return MEM_FlowVenturi->GetData(Delay);
+}
+float HAL::GetPVenturi(int32_t Delay)
+{
+	return MEM_PVenturi->GetData(Delay);
 }
 void HAL::SetInputValve(float value)
 {

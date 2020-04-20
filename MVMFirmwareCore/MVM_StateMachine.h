@@ -15,6 +15,7 @@
 #include "ConfigManager.h"
 #include "HAL.h"
 
+
 typedef enum {
 	FR_OPEN_INVALVE,
 	FR_WAIT_INHALE_TIME,
@@ -33,6 +34,26 @@ public:
 	void Init(HAL* _MVM_HAL, t_config* core_config, t_SystemStatus* sys_c, int32_t _dT);
 	void Tick();
 	uint32_t dbg_state_machine;
+	
+	std::function<void()> callback_NewCycle = NULL;
+	std::function<void()> callback_Exhale = NULL;
+	std::function<void()> callback_EndCycle = NULL;
+	
+	void addHandler_NewCycle(std::function<void()> callback)
+	{
+		callback_NewCycle = callback;
+	}
+
+	void addHandler_Exhale(std::function<void()> callback)
+	{
+		callback_Exhale = callback;
+	}
+
+	void addHandler_EndCycle(std::function<void()> callback)
+	{
+		callback_EndCycle = callback;
+	}
+
 private:
 	void SMExecute();
 	float timer1;
