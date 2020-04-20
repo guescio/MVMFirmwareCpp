@@ -4,6 +4,7 @@
 typedef enum { PWM_PV1 } hw_pwm;
 typedef enum { GPIO_PV2, GPIO_BUZZER, GPIO_LED, GPIO_RELEALLARM } hw_gpio;
 typedef enum { PRESSURE_VALVE, PRESSURE_PATIENT } t_pressure_selector;
+typedef enum { PS_LOOP, PS_PATIENT, PS_VENTURI } t_pressure_sensor;
 typedef enum {  IIC_INVALID, 
 				IIC_PS_0, 
 				IIC_PS_1, 

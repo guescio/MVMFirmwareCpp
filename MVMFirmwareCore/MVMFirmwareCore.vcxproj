@@ -134,6 +134,7 @@
     <ClInclude Include="MVMCore.h" />
     <ClInclude Include="MVM_StateMachine.h" />
     <ClInclude Include="PressureLoop.h" />
+    <ClInclude Include="TidalVolume.h" />
     <ClInclude Include="__vm\.MVMFirmwareCore.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +152,7 @@
     <ClCompile Include="MVMCore.cpp" />
     <ClCompile Include="MVM_StateMachine.cpp" />
     <ClCompile Include="PressureLoop.cpp" />
+    <ClCompile Include="TidalVolume.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

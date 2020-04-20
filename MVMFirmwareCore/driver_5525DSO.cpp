@@ -326,6 +326,28 @@ void Sensor5525DSO::setZero(float value)
     sensorCT.ZERO = value;
 }
 
+float Sensor5525DSO::doZero()
+{
+    float value=0;
+    float cnt = 0;
+    for (int i = 0; i < 50; i++)
+    {
+        float T, P;
+        if (doMeasure(&P, &T))
+        {
+            value += P;
+            cnt++;
+        }
+
+    }
+    if (cnt > 0)
+    {
+        value = value / cnt;
+    }
+    sensorCT.ZERO = value;
+    return value;
+}
+
 
 float Sensor5525DSO::GetConversionDelay()
 {

@@ -26,6 +26,7 @@ typedef enum { OVS_256, OVS_512, OVS_1024, OVS_2048, OVS_4096 } t_ps_resolution;
 			bool asyncGetResult(float *P, float *T);
 
 			void setZero(float value);
+			float doZero();
 			float GetConversionDelay();
 
 		private:

@@ -68,7 +68,6 @@ private:
 	int timer_divider = 0;
 	uint32_t last_start = 0;
 
-	CircularBuffer *PBuffer;
 };
 
 #endif

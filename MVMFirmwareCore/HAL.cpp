@@ -221,3 +221,34 @@ int64_t HAL::Get_dT_millis(uint64_t ms)
 {
 	return hwi.Get_dT_millis(ms);
 }
+
+float HAL::ZeroPressureSensor(t_pressure_sensor ps)
+{
+	
+	switch (ps)
+	{
+	case PS_LOOP:
+		return drv_PLoop.doZero();
+		break;
+	case PS_PATIENT:
+		return drv_PPatient.doZero();
+		break;
+	case PS_VENTURI:
+		return drv_PVenturi.doZero();
+		break;
+	default:
+		return 0;
+		break;
+	}
+}
+
+void HAL::ConfigureInputValvePID(float P, float I, float D, float P2, float I2, float D2, float pid_limit)
+{
+	PressureLoop.ConfigurePidSlow(P2, I2, D2, pid_limit);
+	PressureLoop.ConfigurePidFast(P, I, D);
+}
+
+void HAL::delay_ms(float ms)
+{
+	hwi.__delay_blocking_ms((uint32_t) ms);
+}

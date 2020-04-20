@@ -21,9 +21,9 @@ class PressureLoopClass
     float GetValveControl();
     void SetPressure(t_pressure_selector ps, float pressure);
     void SetTargetPressure(float pressure);
-    void ConfigurePidSlow(float P, float I, float D);
+    void ConfigurePidSlow(float P, float I, float D, float pid_limiter);
     void ConfigurePidFast(float P, float I, float D);
-    void GetPidSlow(float *P, float *I, float *D);
+    void GetPidSlow(float *P, float *I, float *D, float *pid_limiter);
     void GetPidFast(float *P, float *I, float *D);
     void SetPidFilter(float fast, float slow);
     void GetPidFilter(float *fast, float *slow);

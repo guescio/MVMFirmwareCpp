@@ -183,12 +183,12 @@ void PressureLoopClass::SetPressure(t_pressure_selector ps, float pressure)
     }
 }
 
-void PressureLoopClass::ConfigurePidSlow(float P, float I, float D)
+void PressureLoopClass::ConfigurePidSlow(float P, float I, float D, float pid_limiter)
 {
     _PID_P2 = P;
     _PID_I2 = I;
     _PID_D2 = D;
-
+    _pid_limit = pid_limiter;
 }
 void PressureLoopClass::ConfigurePidFast(float P, float I, float D)
 {
@@ -196,11 +196,12 @@ void PressureLoopClass::ConfigurePidFast(float P, float I, float D)
     _PID_I = I;
     _PID_D = D;
 }
-void PressureLoopClass::GetPidSlow(float* P, float* I, float* D)
+void PressureLoopClass::GetPidSlow(float* P, float* I, float* D,  float* pid_limiter)
 {
     *P = _PID_P2;
     *I = _PID_I2;
     *I = _PID_D2;
+    *pid_limiter = _pid_limit;
 }
 void PressureLoopClass::GetPidFast(float* P, float* I, float* D)
 {

@@ -1,5 +1,5 @@
 // MVMCore.h
-
+#pragma once
 #ifndef _MVMCORE_h
 #define _MVMCORE_h
 
@@ -25,10 +25,12 @@ public:
 	bool WriteUART0(String s);
 	bool SetParameter(String p, String v);
 	String GetParameter(String p);
-	
+	void ZeroSensors(float *sensors, int *count);
+	void FlushPipes(bool run);
+	void CalibrateOxygenSensor();
 	
 private:
-	void InitConfiguration();
+	
 	HAL MVM_HAL;
 	ConfigManagerClass CMC;
 	t_SystemStatus sys_s;
@@ -38,10 +40,9 @@ private:
 	CircularBuffer  *MEM_Ppatient_LP;
 	MVM_StateMachine MVM_SM;
 	
-
 	float old_delta_ppatient;
-	
 	uint64_t last_respiratory_act;
+	float averaged_PPatient;
 
 	void PPatient_Event();
 	void FlowIn_Event();
@@ -52,6 +53,7 @@ private:
 	void NewCycle_Event();
 	void Exhale_Event();
 	void EndCycle_Event();
+	void ConfigurationChanged_Event();
 };
 #endif
 

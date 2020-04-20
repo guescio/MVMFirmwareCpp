@@ -59,6 +59,7 @@ class HAL
 		void SetInputValve(float value);
 		void SetOutputValve(bool value);
 		void GetInputValvePID(float *pid_slow, float *pid_fast);
+		void ConfigureInputValvePID(float P, float I, float D, float P2, float I2, float D2, float pid_limit);
 		void SetBuzzer(bool value);
 		void SetAlarmLed(bool value);
 		void SetAlarmRele(bool value);
@@ -71,6 +72,8 @@ class HAL
 		bool WriteUART0(String s);
 		uint64_t GetMillis();
 		int64_t Get_dT_millis(uint64_t ms);
+		float ZeroPressureSensor(t_pressure_sensor ps);
+		void delay_ms(float ms);
 
 		std::function<void()> callback_ploop = NULL;
 		std::function<void()> callback_ppatient = NULL;

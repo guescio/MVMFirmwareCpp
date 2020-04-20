@@ -43,6 +43,7 @@ typedef struct
 
 typedef struct
 {
+    float current_pressure_setpoint;
 	float pLoop;
 	float pPatient;
     float pPatient_low_passed;
@@ -60,6 +61,7 @@ typedef struct
     float currentBatteryCharge = 100;
 
     float currentP_Peak = 0;
+    float currentF_Peak = 0;
     float currentTvIsnp = 0;
     float currentTvEsp = 0;
     float currentVM = 0;
@@ -76,8 +78,7 @@ typedef struct
     float dgb_peaktime;
     float fluxpeak = 0;
     float pres_peak = 0;
-    unsigned long peaktime = 0;
-
+    
     float dt_veturi_100ms = 0;
 
     float pid_valvein_slow;

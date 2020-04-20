@@ -11,7 +11,8 @@ void MVMCore::Init()
 {
 	MVM_HAL.Init();
 	
-	CMC.Init(&sys_s);
+	CMC.Init(this, &sys_s, &Alarms);
+	CMC.addHandler_AfterConfigurationSet(std::bind(&MVMCore::ConfigurationChanged_Event, this));
 
 	MVM_HAL.SetInputValve(0);
 	MVM_HAL.SetOutputValve(0);
@@ -22,6 +23,7 @@ void MVMCore::Init()
 	MVM_HAL.addHandler_PPatient(std::bind(&MVMCore::PPatient_Event, this));
 	MVM_HAL.addHandler_FlowSens(std::bind(&MVMCore::FlowIn_Event, this));
 	MVM_HAL.addHandler_FlowVenturi(std::bind(&MVMCore::FlowVenturi_Event, this));
+	
 
 	MEM_Ppatient_LP = new CircularBuffer(10);
 	
@@ -32,8 +34,22 @@ void MVMCore::Init()
 	Alarms.Init(&MVM_HAL, &sys_s);
 
 	MVM_SM.Init(&MVM_HAL, &CMC.core_config, &sys_s, 10);
-	
 
+	averaged_PPatient = 0;
+	
+	MVM_HAL.delay_ms(100);
+	MVM_HAL.SetInputValve(0);
+	MVM_HAL.SetOutputValve(true);
+	MVM_HAL.delay_ms(3000);
+
+	MVM_HAL.dbg.DbgPrint(DBG_CODE, DBG_INFO, "Calibrating pressure sensors. Idraulic circuit must be opened");
+	float pzero1 = MVM_HAL.ZeroPressureSensor(PS_LOOP);
+	float pzero2 = MVM_HAL.ZeroPressureSensor(PS_PATIENT);
+	float pzero3 = MVM_HAL.ZeroPressureSensor(PS_VENTURI);
+	MVM_HAL.dbg.DbgPrint(DBG_CODE, DBG_INFO, "ZERO -> PLOOP: " + String(pzero1) + " PPATIENT: " + String(pzero2) + " PVENTURI: " + String(pzero3));
+	MVM_HAL.SetOutputValve(false);
+
+	
 }
 void MVMCore::Tick()
 {
@@ -92,6 +108,14 @@ void MVMCore::PPatient_Event()
 	sys_s.PPatient_delta2 = sys_s.PPatient_delta - old_delta_ppatient;
 	old_delta_ppatient = sys_s.PPatient_delta;
 
+	
+
+	averaged_PPatient = (MVM_HAL.GetPressurePatient(5) +
+		MVM_HAL.GetPressurePatient(6) +
+		MVM_HAL.GetPressurePatient(7) +
+		MVM_HAL.GetPressurePatient(8) +
+		MVM_HAL.GetPressurePatient(9)) / 5.0;
+
 	//SAFETY
 	if (v > PV1_SAFETY_LIMIT)
 	{
@@ -139,15 +163,60 @@ void MVMCore::NewCycle_Event()
 		sys_s.last_bpm = 0;
 	}
 	sys_s.averaged_bpm = 0.8 * sys_s.averaged_bpm + 0.2 * sys_s.last_bpm;
+
+	sys_s.last_peep = averaged_PPatient;
+	sys_s.pres_peak = 0;
+	sys_s.fluxpeak = 0;
+	
+
 }
 void MVMCore::Exhale_Event()
 {
 	TidalVolumeExt.DoExhale();
 	sys_s.currentTvIsnp = TidalVolumeExt.currentTvIsnp;
 	sys_s.currentVM = sys_s.currentTvIsnp * sys_s.last_bpm;
+	sys_s.currentF_Peak = TidalVolumeExt.currentFluxPeak;
+	sys_s.currentP_Peak = sys_s.pres_peak;
 }
 void MVMCore::EndCycle_Event()
 {
 	TidalVolumeExt.DoEndCycle();
 	sys_s.currentTvEsp = TidalVolumeExt.currentTvEsp;
+}
+
+void MVMCore::ConfigurationChanged_Event()
+{
+	MVM_HAL.ConfigureInputValvePID(CMC.core_config.P,
+		CMC.core_config.I,
+		CMC.core_config.D,
+		CMC.core_config.P2,
+		CMC.core_config.I2,
+		CMC.core_config.D2,
+		CMC.core_config.pid_limit
+	);
+}
+
+void MVMCore::ZeroSensors(float *sensors, int *count)
+{
+	float pzero1 = MVM_HAL.ZeroPressureSensor(PS_LOOP);
+	float pzero2 = MVM_HAL.ZeroPressureSensor(PS_PATIENT);
+	float pzero3 = MVM_HAL.ZeroPressureSensor(PS_VENTURI);
+
+	if (*count >= 3)
+	{
+		sensors[0] = pzero1;
+		sensors[1] = pzero2;
+		sensors[2] = pzero3;
+		*count = 3;
+	}
+}
+
+void MVMCore::CalibrateOxygenSensor()
+{
+	//TODO
+}
+
+void MVMCore::FlushPipes(bool run)
+{
+	//TODO
 }

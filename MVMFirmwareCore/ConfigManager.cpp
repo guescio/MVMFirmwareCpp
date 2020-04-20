@@ -6,10 +6,13 @@
 #include "FwVersion.h"
 #include "generic_definitions.h"
 #include "UtilsFn.h"
+#include "MVMCore.h"
 
-void ConfigManagerClass::Init(t_SystemStatus* _sys_s)
+void ConfigManagerClass::Init(void* _core, t_SystemStatus* _sys_s, AlarmClass *_Alarms)
 {
     sys_s = _sys_s;
+    core = _core;
+    Alarms = _Alarms;
     core_config.run = false;
     core_config.inhale_ms = 750;
     core_config.exhale_ms = 1250;
@@ -42,6 +45,11 @@ void ConfigManagerClass::Init(t_SystemStatus* _sys_s)
 
 bool ConfigManagerClass::SetParameter(String p, String v)
 {
+    if (callback_BeforeConfigurationSet)
+    {
+        callback_BeforeConfigurationSet();
+    }
+    bool bres = false;
     String strPatam = p;
 
     //Serial.println("CMD: " +  param.getValue() + " " +  value.getValue());
@@ -54,7 +62,7 @@ bool ConfigManagerClass::SetParameter(String p, String v)
         else
             core_config.run = true;
 
-        return true;
+        bres = true;
     }
 
     if (strPatam == "mode") {
@@ -67,7 +75,7 @@ bool ConfigManagerClass::SetParameter(String p, String v)
             //Assisted Mode
             core_config.BreathMode = M_BREATH_ASSISTED;
         }
-        return true;
+        bres = true;
     }
 
     if (strPatam == "rate") {
@@ -75,7 +83,7 @@ bool ConfigManagerClass::SetParameter(String p, String v)
         core_config.respiratory_rate = numberValue;
         core_config.inhale_ms = 60000.0 / core_config.respiratory_rate * (1 - core_config.respiratory_ratio);
         core_config.exhale_ms = 60000.0 / core_config.respiratory_rate * (core_config.respiratory_ratio);
-        return true;
+        bres = true;
     }
 
     if (strPatam == "ratio") {
@@ -83,166 +91,172 @@ bool ConfigManagerClass::SetParameter(String p, String v)
         core_config.respiratory_ratio = numberValue;
         core_config.inhale_ms = 60000.0 / core_config.respiratory_rate * (1 - core_config.respiratory_ratio);
         core_config.exhale_ms = 60000.0 / core_config.respiratory_rate * (core_config.respiratory_ratio);
-        return true;
+        bres = true;
     }
 
     if (strPatam == "assist_ptrigger") {
         float numberValue = v.toFloat();
         core_config.assist_pressure_delta_trigger = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "assist_flow_min") {
         float numberValue = v.toFloat();
         core_config.flux_close = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "ptarget") {
         float numberValue = v.toFloat();
         core_config.target_pressure_auto = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pressure_support") {
         float numberValue = v.toFloat();
         core_config.target_pressure_assist = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pid_p") {
         float numberValue = v.toFloat();
         core_config.P = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pid_i") {
         float numberValue = v.toFloat();
         core_config.I = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pid_d") {
         float numberValue = v.toFloat();
         core_config.D = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pid_p2") {
         float numberValue = v.toFloat();
         core_config.P2 = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pid_i2") {
         float numberValue = v.toFloat();
         core_config.I2 = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pid_d2") {
         float numberValue = v.toFloat();
         core_config.D2 = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pause_inhale") {
         int numberValue = v.toInt();
         core_config.pause_inhale = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pause_lg") {
         int numberValue = v.toInt();
         core_config.pause_lg = numberValue ? true : false;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pause_lg_time") {
         int numberValue = v.toFloat();
         core_config.pause_lg_timer = numberValue * 1000.0;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pause_lg_p") {
         int numberValue = v.toFloat();
         core_config.pause_lg_p = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pause_exhale") {
         int numberValue = v.toInt();
         core_config.pause_exhale = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "pid_limit") {
         float numberValue = v.toFloat();
         core_config.pid_limit = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "alarm_snooze") {
         int numberValue = v.toInt();
-        //ResetAlarm(numberValue);
-        return true;
+        Alarms->ResetAlarm();
+        bres = true;
     }
 
     if (strPatam == "alarm") {
         int numberValue = v.toInt();
-        //TriggerAlarm(ALARM_GUI_ALARM);
-        return true;
+        Alarms->TriggerAlarm(ALARM_GUI_ALARM);
+        bres = true;
     }
 
     if (strPatam == "watchdog_reset") {
         int numberValue = v.toInt();
-        //watchdog_time = millis();
+        Alarms->ResetWatchDog();
         sys_s->ALARM_FLAG = sys_s->ALARM_FLAG & (~GenerateFlag(__ERROR_WDOG_PI));
-        return true;
+        bres = true;
     }
 
     if (strPatam == "console") {
         int numberValue = v.toInt();
         core_config.__CONSOLE_MODE = numberValue != 0 ? true : false;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "timestamp") {
         int numberValue = v.toInt();
         core_config.__ADDTimeStamp = numberValue != 0 ? true : false;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "wdenable") {
         int numberValue = v.toInt();
         core_config.__WDENABLE = numberValue != 0 ? true : false;
-        sys_s->ALARM_FLAG = sys_s->ALARM_FLAG & (~GenerateFlag(__ERROR_ALARM_PI));
-        return true;
+        Alarms->EnableWatchDog(core_config.__WDENABLE);
+        bres = true;
     }
 
     if (strPatam == "backup_enable") {
         int numberValue = v.toInt();
         core_config.backup_enable = numberValue ? true : false;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "backup_min_rate") {
         float numberValue = v.toFloat();
         numberValue = numberValue < 1 ? 1 : numberValue;
         core_config.backup_min_rate = numberValue;
-        return true;
+        bres = true;
     }
 
     if (strPatam == "stats_clear") {
         //ResetStatsBegin();
-        return true;
+        bres = true;
     }
 
-    return false;
+    if (callback_AfterConfigurationSet)
+    {
+        callback_AfterConfigurationSet();
+    }
+
+    return bres;
 }
 String ConfigManagerClass::GetParameter(String p)
 {
-
+    if (callback_BeforeConfigurationGet)
+        callback_BeforeConfigurationGet();
     String strPatam = p;
 
     //Serial.println("CMD: " +  param.getValue() + " " +  value.getValue());
@@ -364,20 +378,18 @@ String ConfigManagerClass::GetParameter(String p)
     }
 
     if (strPatam == "calib") {
-       /* Serial.print("Valore=");
-        for (int j = 0; j < N_PRESSURE_SENSORS; j++) {
-            i2c_MuxSelect(pressure_sensor_i2c_mux[j]);
-            float mean = 0;
-            PRES_SENS_CT[j].ZERO = 0;
-            for (int q = 0; q < 100; q++) {
-                read_pressure_sensor(j);
-                mean += pressure[j].last_pressure;
-            }
-            PRES_SENS_CT[j].ZERO = mean / 100;
-
-            Serial.print(String(PRES_SENS_CT[j].ZERO) + ",");
+        float zeros[4];
+        int count=4;
+        ((MVMCore*)core)->ZeroSensors(zeros,&count);
+        String outval ="valore=";
+        for (int i = 0; i < count; i++)
+        {
+            if (i != count - 1)
+                outval += String(zeros[i]) + ",";
+            else
+                outval += String(zeros[i]);
         }
-        Serial.println(" ");*/
+        return outval;
     }
 
     if (strPatam == "calibv") {
@@ -429,4 +441,7 @@ String ConfigManagerClass::GetParameter(String p)
     return "valore=ERROR:Invalid Command Argument";
 }
 
-
+uint32_t ConfigManagerClass::GenerateFlag(int alarm_code)
+{
+    return (1 << alarm_code);
+}
