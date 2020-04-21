@@ -26,3 +26,14 @@ void DebugIfaceClass::DbgPrint(dbg_source source, verbose_level vl, String s)
 
 
 
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

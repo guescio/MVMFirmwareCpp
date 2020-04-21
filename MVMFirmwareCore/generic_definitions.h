@@ -1,6 +1,23 @@
 #pragma once
 
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu
+
+
 #include <stdint.h>
+
+//#define HARDWARE_TARGET_PLATFORM_V3
+#define HARDWARE_TARGET_PLATFORM_V4 1
+
 typedef enum { PWM_PV1 } hw_pwm;
 typedef enum { GPIO_PV2, GPIO_BUZZER, GPIO_LED, GPIO_RELEALLARM } hw_gpio;
 typedef enum { PRESSURE_VALVE, PRESSURE_PATIENT } t_pressure_selector;
@@ -40,10 +57,13 @@ typedef struct
 #define __ERROR_SYSTEM_FALIURE 31
 
 
-//SAFETY LIMITS
+//SAFETY LIMITS (mbar)
 #define PV1_SAFETY_LIMIT	70
 #define PV2_SAFETY_LIMIT	50
 
+//ACCEPTED INPUT PRESSURE (mbar)
+#define MIN_PIN 3000
+#define MAX_PIN 6000
 
 typedef enum {
 	PRESSURE_DROP_INHALE,
@@ -61,6 +81,20 @@ typedef enum {
 	ALARM_GUI_ALARM,
 	ALARM_GUI_WDOG,
 	ALARM_OVER_UNDER_VOLTAGE,
+	ALARM_SUPERVISOR,
+	ALARM_OVERTEMPERATURE,
 	UNPREDICTABLE_CODE_EXECUTION
 
 } t_ALARM;
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

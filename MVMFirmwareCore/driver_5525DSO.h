@@ -71,3 +71,16 @@ typedef enum { OVS_256, OVS_512, OVS_1024, OVS_2048, OVS_4096 } t_ps_resolution;
 
 #endif
 
+
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

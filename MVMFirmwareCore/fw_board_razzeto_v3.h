@@ -14,7 +14,11 @@
 #include <functional>
 
 
-    #define IIC_COUNT 6
+#define IIC_COUNT 6
+
+#define PLOOP_MODEL     DS_01
+#define PPATIENT_MODEL  DS_01
+#define PVENTURI        DS_01
 
 class HW_V3 :  public HW {
 public:
@@ -36,6 +40,10 @@ public:
     bool DataAvailableOnUART0();
     String ReadUART0UntilEOL();
     bool WriteUART0(String s);
+    void GetPowerStatus(bool* batteryPowered, float* charge);
+    float GetPIN();
+    float GetBoardTemperature();
+    uint16_t GetSupervisorAlarms();
    
 
 private:
@@ -53,3 +61,14 @@ private:
 
 #endif
 
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

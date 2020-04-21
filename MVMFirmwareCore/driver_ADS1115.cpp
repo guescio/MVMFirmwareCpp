@@ -251,3 +251,15 @@ bool ADC_ADS1115::asyncGetResult(uint32_t* value)
     *value = readRegister(ADS1015_REG_POINTER_CONVERT) >> m_bitShift;
     return true;
 }
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

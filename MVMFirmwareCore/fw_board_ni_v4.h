@@ -13,6 +13,10 @@
 
 #define IIC_COUNT 8
 
+#define PLOOP_MODEL     GS_05
+#define PPATIENT_MODEL  DS_01
+#define PVENTURI        DS_01
+
 class HW_V4 : public HW {
 public:
 
@@ -33,6 +37,11 @@ public:
     bool DataAvailableOnUART0();
     String ReadUART0UntilEOL();
     bool WriteUART0(String s);
+    void GetPowerStatus(bool* batteryPowered, float* charge);
+    float GetPIN();
+    float GetBoardTemperature();
+    uint16_t GetSupervisorAlarms();
+
 
 
 private:
@@ -40,13 +49,34 @@ private:
     void i2c_MuxSelect(uint8_t i);
     t_i2cdev GetIICDevice(t_i2cdevices device);
 
+    uint16_t ReadSupervisor( uint8_t i_address);
+    void WriteSupervisor(uint8_t i_address, uint16_t write_data);
+
 
     t_i2cdev iic_devs[IIC_COUNT];
     uint8_t current_muxpos = 10;
 
+    uint64_t batteryStatus_reading_LT;
+    float currentBatteryCharge;
+    bool pWall;
+
+    float pIN;
+    float BoardTemperature;
+    uint16_t HW_AlarmsFlags;
 
 };
 
 
 #endif
 
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

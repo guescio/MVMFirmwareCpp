@@ -78,6 +78,12 @@ bool HW_V4::Init()
 	iic_devs[7].address = 0x00;
 
 
+	batteryStatus_reading_LT = GetMillis();
+
+
+
+	//init supervisor watchdog
+	//WriteSupervisor(0x00, 1);  //REMOVE COMMENT BEFORE RELEASE
 }
 
 bool HW_V4::I2CWrite(t_i2cdevices device, uint8_t* wbuffer, int wlength, bool stop)
@@ -230,9 +236,32 @@ void HW_V4::PrintLineDebugConsole(String s)
 
 void HW_V4::Tick()
 {
+	if (Get_dT_millis(batteryStatus_reading_LT)>1000)
+	{
+		batteryStatus_reading_LT = GetMillis();
+		currentBatteryCharge = (float)ReadSupervisor(0x51);
+		currentBatteryCharge = currentBatteryCharge < 0 ? 0 : currentBatteryCharge;
+		currentBatteryCharge = currentBatteryCharge > 100 ? 100 : currentBatteryCharge;
+		pWall = ReadSupervisor(0x52) >0 ? true : false ;
+		pIN = ((float)ReadSupervisor(0x50));
+		BoardTemperature = ((float)ReadSupervisor(0x56)/10.0);
+		HW_AlarmsFlags = (uint16_t)ReadSupervisor(0x57);
+
+		//reset supervisor watchdog
+ 		WriteSupervisor(0x00, 0);
+		//Serial.println("Battery: " + String(currentBatteryCharge) + " PWALL: " + String (pWall));
+	}
+	
 
 	return;
 }
+void HW_V4::GetPowerStatus(bool* batteryPowered, float* charge)
+{
+	*batteryPowered = pWall ? false:true;
+	*charge = currentBatteryCharge ;
+
+}
+
 
 
 bool HW_V4::DataAvailableOnUART0()
@@ -323,3 +352,57 @@ t_i2cdev HW_V4::GetIICDevice(t_i2cdevices device)
 		}
 	}
 }
+
+
+
+uint16_t HW_V4::ReadSupervisor(uint8_t i_address)
+{
+	uint8_t wbuffer[4];
+	uint8_t rbuffer[4];
+		
+	wbuffer[0] = i_address;
+	I2CRead(IIC_SUPERVISOR, wbuffer, 1, rbuffer, 2, true);
+
+	uint16_t a = Wire.read();
+	uint16_t b = Wire.read();
+
+	a = (rbuffer [1]<< 8) | rbuffer[0];
+	return a;
+}
+
+
+void HW_V4::WriteSupervisor( uint8_t i_address, uint16_t write_data)
+{
+	uint8_t wbuffer[4];
+	wbuffer[0] = i_address;
+	wbuffer[1] = write_data & 0xFF;
+	wbuffer[2] = (write_data >> 8) & 0xFF;
+
+	I2CWrite(IIC_SUPERVISOR, wbuffer, 3, true);
+
+}
+float HW_V4::GetPIN()
+{
+	return pIN;
+}
+float HW_V4::GetBoardTemperature()
+{
+	return BoardTemperature;
+}
+uint16_t HW_V4::GetSupervisorAlarms()
+{
+	return HW_AlarmsFlags;
+}
+
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

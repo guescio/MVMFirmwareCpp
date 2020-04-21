@@ -9,8 +9,17 @@
 	#include "WProgram.h"
 #endif
 
+#include "generic_definitions.h"
+
+#ifdef HARDWARE_TARGET_PLATFORM_V3
 #include "fw_board_razzeto_v3.h"
+#endif
+#ifdef  HARDWARE_TARGET_PLATFORM_V4
 #include "fw_board_ni_v4.h"
+#endif
+
+
+
 #include "DebugIface.h"
 #include "driver_5525DSO.h"
 #include "driver_SFM3019.h"
@@ -19,12 +28,18 @@
 #include "driver_OxygenSensor.h"
 #include "PressureLoop.h"
 #include "CircularBuffer.h"
-#include "generic_definitions.h"
+
 
 class HAL
 {
 	private:
+#ifdef HARDWARE_TARGET_PLATFORM_V3
+		HW_V3 hwi;
+#endif
+#ifdef  HARDWARE_TARGET_PLATFORM_V4
 		HW_V4 hwi;
+#endif
+
 		Sensor5525DSO drv_PLoop;
 		Sensor5525DSO drv_PPatient;
 		Sensor5525DSO drv_PVenturi;
@@ -61,6 +76,10 @@ class HAL
 		float _OutputValveValue;
 		float GasTemperature;
 		
+		float Pin;
+		float BoardTemperature;
+		uint16_t SupervisorAlarms;
+
 	public:
 		DebugIfaceClass dbg;
 		void Init();
@@ -96,6 +115,7 @@ class HAL
 		void CalibrateOxygenSensorInPureOxygen();
 		void TriggerAlarm(t_ALARM alarm_code);
 		float GetGasTemperature();
+		void GetPowerStatus(bool* batteryPowered, float* charge);
 
 		uint8_t _adc_channel;
 		float ADC_Results[4];
@@ -138,3 +158,16 @@ class HAL
 
 #endif
 
+
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

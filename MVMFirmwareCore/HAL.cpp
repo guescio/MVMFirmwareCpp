@@ -13,7 +13,6 @@
 
 
 #include "HAL.h"
-#include "fw_board_razzeto_v3.h"
 #include <functional>
 
 void HAL::Init()
@@ -23,9 +22,9 @@ void HAL::Init()
 	dbg.Init(DBG_WARNING, &hwi);
 	_dc.hwi = &hwi;
 	_dc.dbg = &dbg;
-	drv_PLoop.Init(IIC_PS_0, GS_05, OVS_1024, &_dc);
-	drv_PPatient.Init(IIC_PS_1, DS_01, OVS_1024, &_dc);
-	drv_PVenturi.Init(IIC_PS_2, DS_01, OVS_1024, &_dc);
+	drv_PLoop.Init(IIC_PS_0, PLOOP_MODEL, OVS_1024, &_dc);
+	drv_PPatient.Init(IIC_PS_1, PPATIENT_MODEL, OVS_1024, &_dc);
+	drv_PVenturi.Init(IIC_PS_2, PVENTURI, OVS_1024, &_dc);
 	drv_FlowVenturi.Init(SpiroquantH_R122P04);
 	drv_FlowIn.Init(IIC_FLOW1, &_dc);
 	PressureLoop.Init(5, 5, &_dc);
@@ -97,6 +96,34 @@ void HAL::Tick()
 		else if (hwi.Get_dT_millis(cycle_Supervisor_LT) > SCHEDULER_TIMER_SUPERVISOR)
 		{
 			cycle_Supervisor_LT = hwi.GetMillis();
+
+			Pin = hwi.GetPIN();
+			BoardTemperature = hwi.GetBoardTemperature();
+			SupervisorAlarms = hwi.GetSupervisorAlarms();
+
+			//Check supervisors alarms
+			if (SupervisorAlarms != 0)
+			{
+				TriggerAlarm(ALARM_SUPERVISOR);
+			}
+
+			//Pressure Alarms
+			if (Pin > MAX_PIN)
+			{
+				TriggerAlarm(ALARM_PRESSURE_INPUT_TOO_HIGH);
+			}
+
+			if ((_InputValveValue > 0) && (Pin < MIN_PIN))
+			{
+				TriggerAlarm(ALARM_PRESSURE_INPUT_TOO_LOW);
+			}
+
+			//Check board temperature
+			if (BoardTemperature > 75)
+			{
+				TriggerAlarm(ALARM_OVERTEMPERATURE);
+			}
+
 		}
 		else if (drv_PLoop.asyncGetResult(&Ploop, &Tloop))
 		{
@@ -167,6 +194,11 @@ void HAL::Tick()
 			dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - Flow: " + String(FlowIn));
 			if (callback_flowsens)
 				callback_flowsens();
+		}
+		else
+		{
+
+			
 		}
 	}
 }
@@ -361,3 +393,21 @@ float HAL::GetGasTemperature()
 {
 	return GasTemperature;
 }
+
+void HAL::GetPowerStatus(bool* batteryPowered, float* charge)
+{
+	hwi.GetPowerStatus(batteryPowered, charge);
+}
+
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

@@ -467,3 +467,16 @@ uint32_t ConfigManagerClass::GenerateFlag(int alarm_code)
 {
     return (1 << alarm_code);
 }
+
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

@@ -306,3 +306,33 @@ t_i2cdev HW_V3::GetIICDevice(t_i2cdevices device)
 		}
 	}
 }
+
+void HW_V3::GetPowerStatus(bool* batteryPowered, float* charge)
+{
+	*batteryPowered = false;
+	*charge = 100;
+}
+float HW_V3::GetPIN()
+{
+	return 3.8;
+}
+float HW_V3::GetBoardTemperature()
+{
+	return 40;
+}
+uint16_t HW_V3::GetSupervisorAlarms()
+{
+	return 0;
+}
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

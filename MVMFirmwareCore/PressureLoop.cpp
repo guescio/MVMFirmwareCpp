@@ -240,3 +240,15 @@ void PressureLoopClass::GetPidMonitor(float* slow, float* fast)
     *fast = _ValvePWM;
     *slow = fast_pid_set;
 }
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

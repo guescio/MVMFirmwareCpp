@@ -1,28 +1,24 @@
-/*
- Name:		MVMFirmwareCore.ino
- Created:	12/04/2020 12:23:43
- Author:	Andre
-*/
+/****************************************************************************
+ * MVM Ventialotor V4 Firmware
+ *
+ * This code is designed to run on the HW V4 of MVM Ventialor
+ *
+ * This code is distributed as DEMO and has NOT been tested and is NOT approved
+ * by quality check of Nuclear Instruments or Elemaster
+ *
+ * !!!!   This code MUST NOT BE USED on final application    !!!!!
+ *
+ * Nuclear Instruments and Elemaster do not take responsibility for damage caused
+ * by using this code and decline any responsability
+ *
+ * This code is property of Nuclear Instruments and distributed
+ * with fair use license
+ *
+ ****************************************************************************/
 
 // the setup function runs once when you press reset or power the board
 
-#include "driver_OxygenSensor.h"
-#include "driver_ADS1115.h"
-#include "TidalVolume.h"
-#include "Alarms.h"
-#include "MVM_StateMachine.h"
-#include "ConfigManager.h"
 #include "MVMCore.h"
-#include <SimpleCLI.h>
-#include "CircularBuffer.h"
-#include "PressureLoop.h"
-#include "driver_SFM3019.h"
-#include "DebugIface.h"
-#include "hw.h"
-#include "driver_5525DSO.h"
-#include "fw_board_razzeto_v3.h"
-#include "hw_ard_esp32.h"
-#include "HAL.h"
 #include <SimpleCLI.h>
 
 MVMCore MVM;
@@ -100,3 +96,15 @@ void CliErrorCallback(cmd_error* e)
     Serial.print("valore=ERROR: ");
     Serial.println(cmdError.toString());
 }
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

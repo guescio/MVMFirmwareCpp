@@ -34,6 +34,10 @@ public:
         virtual bool DataAvailableOnUART0();
         virtual String ReadUART0UntilEOL();
         virtual bool WriteUART0(String s);
+        void GetPowerStatus(bool* batteryPowered, float* charge);
+        float GetPIN();
+        float GetBoardTemperature();
+        uint16_t GetSupervisorAlarms();
      
 private:
 
@@ -41,3 +45,14 @@ private:
 
 #endif
 
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

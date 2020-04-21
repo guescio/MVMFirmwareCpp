@@ -67,6 +67,7 @@ void MVMCore::Tick()
 	MVM_HAL.GetInputValvePID(&sys_s.pid_valvein_slow, &sys_s.pid_valvein_fast);
 	MVM_SM.Tick();
 	sys_s.last_O2 = MVM_HAL.GetOxygen();
+	MVM_HAL.GetPowerStatus(&sys_s.batteryPowered, &sys_s.currentBatteryCharge);
 
 	if (MVM_HAL.Get_dT_millis(last_debug_console_log)>5)
 	{
@@ -295,3 +296,16 @@ void MVMCore::MVMDebugPrintLogger()
 		);
 	
 }
+
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu

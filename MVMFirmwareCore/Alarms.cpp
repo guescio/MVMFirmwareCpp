@@ -349,6 +349,21 @@ void AlarmClass::TriggerAlarm(t_ALARM Alarm)
         ALARM_FLAG = ALARM_FLAG | GenerateFlag(__ERROR_WDOG_PI);
         break;
 
+    case ALARM_OVER_UNDER_VOLTAGE:
+        _HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "ALARM @ " + String(millis()) + " ALARM_OVER_UNDER_VOLTAGE");
+        ALARM_FLAG = ALARM_FLAG | GenerateFlag(__ERROR_SYSTEM_FALIURE);
+        break;
+    case ALARM_SUPERVISOR:
+        _HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "ALARM @ " + String(millis()) + " ALARM_SUPERVISOR");
+        ALARM_FLAG = ALARM_FLAG | GenerateFlag(__ERROR_SYSTEM_FALIURE);
+        break;
+
+    case ALARM_OVERTEMPERATURE:
+        _HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "ALARM @ " + String(millis()) + " ALARM_OVERTEMPERATURE");
+        ALARM_FLAG = ALARM_FLAG | GenerateFlag(__ERROR_SYSTEM_FALIURE);
+        break;
+
+        
     case UNPREDICTABLE_CODE_EXECUTION:
         _HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "ALARM @ " + String(millis()) + " UNPREDICTABLE_CODE_EXECUTION");
         ALARM_FLAG = ALARM_FLAG | GenerateFlag(__ERROR_SYSTEM_FALIURE);
@@ -425,3 +440,16 @@ uint32_t AlarmClass::GenerateFlag(int alarm_code)
 {
     return (1 << alarm_code);
 }
+
+
+//                  #     # ### 
+//                  ##    #  #  
+//                  # #   #  #  
+//                  #  #  #  #  
+//                  #   # #  #  
+//                  #    ##  #  
+//                  #     # ### 
+//
+// Nuclear Instruments 2020 - All rights reserved
+// Any commercial use of this code is forbidden
+// Contact info@nuclearinstruments.eu
