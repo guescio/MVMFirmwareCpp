@@ -61,6 +61,9 @@ private:
     DebugIfaceClass* dbg;
 
     uint64_t cycle_Loop_LT;
+
+    uint64_t last_fast_ms;
+    uint64_t last_slow_ms;
 };
 
 

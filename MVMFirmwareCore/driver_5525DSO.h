@@ -10,6 +10,13 @@
 #endif
 #include "DriverContext.h"
 
+typedef struct
+{
+	int32_t C[6];
+	int32_t Q[6];
+	float ZERO;
+} t_5525DSO_calibration_table;
+
 //#define PBUFFER_SIZE 32
 typedef enum { DS_01, GS_05 } t_ps_sensor;
 typedef enum { OVS_256, OVS_512, OVS_1024, OVS_2048, OVS_4096 } t_ps_resolution;
@@ -27,15 +34,11 @@ typedef enum { OVS_256, OVS_512, OVS_1024, OVS_2048, OVS_4096 } t_ps_resolution;
 
 			void setZero(float value);
 			float doZero();
+			void correctZero(float value);
 			float GetConversionDelay();
 
 		private:
-			typedef struct
-			{
-				int32_t C[6];
-				int32_t Q[6];
-				float ZERO;
-			} t_5525DSO_calibration_table;
+
 
 
 			t_5525DSO_calibration_table sensorCT;

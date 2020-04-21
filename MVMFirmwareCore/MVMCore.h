@@ -45,17 +45,19 @@ private:
 	uint64_t last_respiratory_act;
 	float averaged_PPatient;
 
+	uint64_t last_debug_console_log;
+
 	void PPatient_Event();
 	void FlowIn_Event();
 	void PLoop_Event();
 	void FlowVenturi_Event();
-
-
 	void NewCycle_Event();
 	void Exhale_Event();
 	void EndCycle_Event();
 	void ConfigurationChanged_Event();
 	void HardwareAlarm_Event(t_ALARM alarm_code);
+
+	void MVMDebugPrintLogger();
 };
 #endif
 

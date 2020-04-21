@@ -29,17 +29,20 @@ void ConfigManagerClass::Init(void* _core, t_SystemStatus* _sys_s, AlarmClass *_
     core_config.exhale_ms = 60000.0 / core_config.respiratory_rate * (core_config.respiratory_ratio);
 
     core_config.P = 70;
-    core_config.I = 10;
+    core_config.I = 1000;
     core_config.D = 0;
 
     core_config.P2 = 1.4;
-    core_config.I2 = 0.4;
+    core_config.I2 = 16;
     core_config.D2 = 0;
 
     core_config.pid_limit = 0.65;
 
     core_config.pause_lg = false;
     core_config.pause_lg_timer = 0;
+
+    core_config.__ADDTimeStamp = true;
+    core_config.__CONSOLE_MODE = false;
 
 }
 
@@ -273,6 +276,11 @@ String ConfigManagerClass::GetParameter(String p)
     if (strPatam == "pressure") {
         return "valore=" + String(sys_s->pLoop);
    
+    }
+
+    if (strPatam == "ppressure") {
+        return "valore=" + String(sys_s->pPatient);
+
     }
 
     if (strPatam == "flow") {

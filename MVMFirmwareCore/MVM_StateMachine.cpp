@@ -51,6 +51,7 @@ void MVM_StateMachine::SMExecute()
                 
                 last_start = millis();
               
+                MVM_HAL->SetOutputValve(false);
                 MVM_HAL->SetInputValve(core_config->target_pressure_auto);
 
                 timer1 = 1;

@@ -16,9 +16,9 @@ public:
 
 private:
 	float SpiroquantH_R122P04_Convert(float pressure);
-	float VenturiFlux;
+	float VenturiFlux=0;
 	float _LowPass;
-	float Integral;
+	float Integral=0;
 	t_VenturiSensorModel _model;
 };
 

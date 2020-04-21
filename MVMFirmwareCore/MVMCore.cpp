@@ -25,12 +25,16 @@ void MVMCore::Init()
 	MVM_HAL.addHandler_FlowSens(std::bind(&MVMCore::FlowIn_Event, this));
 	MVM_HAL.addHandler_FlowVenturi(std::bind(&MVMCore::FlowVenturi_Event, this));
 	MVM_HAL.addHandler_HardwareAlarm(std::bind(&MVMCore::HardwareAlarm_Event, this, _1));
-	
+	MVM_SM.addHandler_NewCycle(std::bind(&MVMCore::NewCycle_Event, this));
+	MVM_SM.addHandler_Exhale(std::bind(&MVMCore::Exhale_Event, this));
+	MVM_SM.addHandler_EndCycle(std::bind(&MVMCore::EndCycle_Event, this));
 
 	MEM_Ppatient_LP = new CircularBuffer(10);
 	
 	old_delta_ppatient = 0;
 	
+	sys_s.batteryPowered = false;
+	sys_s.currentBatteryCharge = 100;
 	sys_s.in_over_pressure_emergency = false;
 	
 	Alarms.Init(&MVM_HAL, &sys_s);
@@ -51,7 +55,7 @@ void MVMCore::Init()
 	MVM_HAL.dbg.DbgPrint(DBG_CODE, DBG_INFO, "ZERO -> PLOOP: " + String(pzero1) + " PPATIENT: " + String(pzero2) + " PVENTURI: " + String(pzero3));
 	MVM_HAL.SetOutputValve(false);
 
-	
+	last_debug_console_log = MVM_HAL.GetMillis();
 }
 void MVMCore::Tick()
 {
@@ -62,6 +66,16 @@ void MVMCore::Tick()
 	sys_s.FlowVenturi = MVM_HAL.GetFlowVenturi(0);
 	MVM_HAL.GetInputValvePID(&sys_s.pid_valvein_slow, &sys_s.pid_valvein_fast);
 	MVM_SM.Tick();
+	sys_s.last_O2 = MVM_HAL.GetOxygen();
+
+	if (MVM_HAL.Get_dT_millis(last_debug_console_log)>5)
+	{
+		last_debug_console_log = MVM_HAL.GetMillis();
+		if (CMC.core_config.__CONSOLE_MODE)
+		{
+			MVMDebugPrintLogger();
+		}
+	}
 }
 
 bool MVMCore::DataAvailableOnUART0()
@@ -97,6 +111,7 @@ void MVMCore::PLoop_Event()
 	{
 		Alarms.Action_OverPressureSecurity();
 	}
+
 }
 void MVMCore::PPatient_Event()
 {
@@ -134,7 +149,7 @@ void MVMCore::FlowIn_Event()
 	TidalVolumeExt.PushDataSens(v);
 	sys_s.TidalVolume = TidalVolumeExt.liveVolume;
 	sys_s.Flux = TidalVolumeExt.liveFlux;
-
+	sys_s.GasTemperature = MVM_HAL.GetGasTemperature();
 	//Serial.println("CALLBACK F: " + String(v));
 }
 
@@ -152,7 +167,7 @@ void MVMCore::FlowVenturi_Event()
 
 void MVMCore::NewCycle_Event()
 {
-	MVM_HAL.SetZeroPressureSensor(PS_VENTURI, sys_s.dt_veturi_100ms);
+	MVM_HAL.CorrectZeroPressureSensor(PS_VENTURI, sys_s.dt_veturi_100ms);
 
 	TidalVolumeExt.DoNewCycle();
 	float dTact = (float)MVM_HAL.Get_dT_millis(last_respiratory_act);
@@ -253,3 +268,30 @@ bool MVMCore::FlushPipes(bool run)
 	//TODO
 }
 
+
+
+void MVMCore::MVMDebugPrintLogger()
+{
+	float pid_slow, pid_fast;
+	float InputValveSetPoint;
+	float OutputValveSetPoint;
+	MVM_HAL.GetInputValvePID(&pid_slow, &pid_fast);
+	InputValveSetPoint = MVM_HAL.GetInputValve();
+	OutputValveSetPoint = MVM_HAL.GetOutputValve() * 100;
+
+	String ts = CMC.core_config.__ADDTimeStamp ? String((uint32_t)MVM_HAL.GetMillis()) + "," : "";
+
+	MVM_HAL.WriteUART0(ts+ 
+		String(sys_s.FlowIn) + "," +
+		String(sys_s.pLoop) + "," +
+		String(sys_s.pPatient) + "," +
+		String(pid_fast) + "," +
+		String(pid_slow) + "," +
+		String(OutputValveSetPoint) + "," +
+		String(sys_s.VenturiFlux) + "," +
+		String(sys_s.Flux) + "," +
+		String(sys_s.TidalVolume) + "," +
+		String(sys_s.PPatient_delta2 * 10)
+		);
+	
+}

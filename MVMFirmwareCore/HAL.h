@@ -47,6 +47,7 @@ class HAL
 		uint64_t cycle_FlowIn_LT;
 		uint64_t cycle_ADC_LT;
 		uint64_t cycle_Supervisor_LT;
+		uint64_t cycle_LT;
 		float Tloop, Ploop;
 		float Tpatient, Ppatient;
 		float FlowIn, TFlowIn;
@@ -56,8 +57,9 @@ class HAL
 		float VoltageReference;
 		float VoltageProbe12V;
 		float VoltageProbe5V;
-
-		
+		float _InputValveValue;
+		float _OutputValveValue;
+		float GasTemperature;
 		
 	public:
 		DebugIfaceClass dbg;
@@ -68,7 +70,9 @@ class HAL
 		float GetFlowVenturi(int32_t Delay);
 		float GetPVenturi(int32_t Delay);
 		void SetInputValve(float value);
+		float GetInputValve();
 		void SetOutputValve(bool value);
+		float GetOutputValve();
 		void GetInputValvePID(float *pid_slow, float *pid_fast);
 		void ConfigureInputValvePID(float P, float I, float D, float P2, float I2, float D2, float pid_limit);
 		void SetBuzzer(bool value);
@@ -85,11 +89,13 @@ class HAL
 		int64_t Get_dT_millis(uint64_t ms);
 		float ZeroPressureSensor(t_pressure_sensor ps);
 		void SetZeroPressureSensor(t_pressure_sensor ps, float value);
+		void CorrectZeroPressureSensor(t_pressure_sensor ps, float value);
 		void delay_ms(float ms);
 		float GetOxygen();
 		void CalibrateOxygenSensorInAir();
 		void CalibrateOxygenSensorInPureOxygen();
 		void TriggerAlarm(t_ALARM alarm_code);
+		float GetGasTemperature();
 
 		uint8_t _adc_channel;
 		float ADC_Results[4];

@@ -90,13 +90,13 @@ bool Sensor5525DSO::doMeasure(float* P, float* T)
     wbuffer[0] = GetResolutionByteCodePressure();
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
-    hwi->__delay_blocking_ms(GetResolutionDelay());
+    hwi->__delay_blocking_ms(GetResolutionDelay()*2);
 
     wbuffer[0] = 0x00;
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
 
-    hwi->__delay_blocking_ms(1);
+    hwi->__delay_blocking_ms(2);
 
     bres = hwi->I2CRead(i2c_device, rbuffer, 3, true);
     if (!bres) return false;
@@ -107,13 +107,13 @@ bool Sensor5525DSO::doMeasure(float* P, float* T)
     wbuffer[0] = GetResolutionByteCodeTemp();
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
-    hwi->__delay_blocking_ms(GetResolutionDelay());
+    hwi->__delay_blocking_ms(GetResolutionDelay()*2);
 
     wbuffer[0] = 0x00;
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
 
-    hwi->__delay_blocking_ms(1);
+    hwi->__delay_blocking_ms(2);
 
     bres = hwi->I2CRead(i2c_device, rbuffer, 3, true);
     if (!bres) return false;
@@ -122,7 +122,7 @@ bool Sensor5525DSO::doMeasure(float* P, float* T)
 
     CalibrateDate_5525DSO(temperature_raw, pressure_raw, T, P);
 
-    dbg->DbgPrint(DBG_KERNEL, DBG_VALUE, "T:  " + String(*T) + "   P:  " + String(*P));
+    dbg->DbgPrint(DBG_KERNEL, DBG_INFO, "T:  " + String(*T) + "   P:  " + String(*P));
 
 
     return true;
@@ -209,6 +209,7 @@ bool Sensor5525DSO::asyncGetResult(float* P, float* T)
 }
 void Sensor5525DSO::CalibrateDate_5525DSO(int32_t raw_temp, int32_t raw_pressure, float* T, float* P)
 {
+    float PINSIDE, PINSIDE_ZERO;
     int32_t Q1 = sensorCT.Q[0];
     int32_t Q2 = sensorCT.Q[1];
     int32_t Q3 = sensorCT.Q[2];
@@ -237,8 +238,10 @@ void Sensor5525DSO::CalibrateDate_5525DSO(int32_t raw_temp, int32_t raw_pressure
     Pres = (((raw_pressure * SENS) / (pow(2, 21))) - OFF) / (pow(2, 15));
 
     *T = ((float)Temp) / 100.0;
-    *P = ((float)Pres) / 10000.0 * 68.9476;
-    *P = *P - sensorCT.ZERO;
+    PINSIDE = ((float)Pres) / 10000.0 * 68.9476;
+    PINSIDE_ZERO = PINSIDE - sensorCT.ZERO;
+   //     Serial.println("DBG; " + String(PINSIDE) + " " + String(sensorCT.ZERO) + " " + String(PINSIDE_ZERO));
+    *P = PINSIDE_ZERO;
 }
 uint8_t Sensor5525DSO::GetResolutionByteCodeTemp()
 {
@@ -329,11 +332,15 @@ void Sensor5525DSO::setZero(float value)
 
 float Sensor5525DSO::doZero()
 {
+    float T, P;
     float value=0;
     float cnt = 0;
+    sensorCT.ZERO = 0;
+    doMeasure(&P, &T);
+
     for (int i = 0; i < 50; i++)
     {
-        float T, P;
+        
         if (doMeasure(&P, &T))
         {
             value += P;
@@ -346,9 +353,14 @@ float Sensor5525DSO::doZero()
         value = value / cnt;
     }
     sensorCT.ZERO = value;
+    doMeasure(&P, &T);
     return value;
 }
 
+void Sensor5525DSO::correctZero(float value)
+{
+    sensorCT.ZERO += value;
+}
 
 float Sensor5525DSO::GetConversionDelay()
 {

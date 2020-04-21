@@ -310,6 +310,7 @@ void HW_V4::i2c_MuxSelect(uint8_t i)
 	Wire.beginTransmission(TCAADDR);
 	Wire.write(1 << i);
 	Wire.endTransmission();
+
 }
 
 t_i2cdev HW_V4::GetIICDevice(t_i2cdevices device)

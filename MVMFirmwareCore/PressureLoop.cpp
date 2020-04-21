@@ -16,15 +16,18 @@ void PressureLoopClass::Init(float fast_ms, int32_t LoopRatio, void* handle)
     _LoopRatio = LoopRatio;
     LoopCounter = 0;
     _PID_P = 70;
-    _PID_I = 12;
+    _PID_I = 1000;
     _PID_D = 0;
     _PID_P2 = 1.2;
-    _PID_I2 = 0.4;
+    _PID_I2 = 16;
     _PID_D2 = 0;
     _pid_limit = 0.55;
     _filter_fast = 0.9;
     _filter_slow = 0.7;
     _ValvePWM = 0;
+
+    last_fast_ms = hwi->GetMillis();
+    last_slow_ms = hwi->GetMillis();
 }
 
 
@@ -46,6 +49,9 @@ void PressureLoopClass::PID_SLOW_LOOP()
 
     float Pmeas = 0;
 
+    float dT = ((float)hwi->Get_dT_millis(last_slow_ms))/1000.0;
+    last_slow_ms = hwi->GetMillis();
+
     Pmeas = _pressure_patient;
 
     if (_Pset == 0) {
@@ -58,7 +64,7 @@ void PressureLoopClass::PID_SLOW_LOOP()
         Pset2 = (Pset2 * _filter_slow) + ((1- _filter_slow) * _Pset);
 
         pid_error = Pset2 - Pmeas;
-        pid_integral += pid_error;
+        pid_integral += pid_error* dT;
        
         if (pid_integral < 0)
             pid_integral = 0;
@@ -97,6 +103,10 @@ void PressureLoopClass::PID_FAST_LOOP()
 
     float Pmeas = 0;
 
+    float dT = ((float)hwi->Get_dT_millis(last_fast_ms))/1000.0;
+    last_fast_ms = hwi->GetMillis();
+
+
     Pmeas = _pressure_valve;
 
     if (_Pset == 0) {
@@ -110,7 +120,7 @@ void PressureLoopClass::PID_FAST_LOOP()
 
 
         pid_error = Pset2 - Pmeas;
-        pid_integral += pid_error;
+        pid_integral += pid_error* dT;
         if ((pid_integral * PID_I) > 4095.0)
             pid_integral = (4095.0 / PID_I);
         if ((pid_integral * PID_I) < -4095.0)
@@ -156,12 +166,12 @@ void PressureLoopClass::Tick()
         {
             if (LoopCounter >= _LoopRatio)
             {
-                PID_FAST_LOOP();
+                PID_SLOW_LOOP();
                 LoopCounter = 0;
             }
             else
             {
-                PID_SLOW_LOOP();
+                PID_FAST_LOOP();
                 LoopCounter++;
             }
         }

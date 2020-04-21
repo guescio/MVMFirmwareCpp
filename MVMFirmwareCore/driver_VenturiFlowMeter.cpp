@@ -8,6 +8,8 @@ void VenturiFlowMeter::Init(t_VenturiSensorModel model)
 {
 	_LowPass = 0.8;
 	_model = model;
+	VenturiFlux = 0;
+	Integral = 0;
 }
 
 float VenturiFlowMeter::GetFlow(float pressure, float temperature)
@@ -15,7 +17,7 @@ float VenturiFlowMeter::GetFlow(float pressure, float temperature)
 	if (_model == SpiroquantH_R122P04)
 	{
 		float vf = SpiroquantH_R122P04_Convert(pressure);
-		VenturiFlux = _LowPass * VenturiFlux + (1 - _LowPass) * vf;
+		VenturiFlux = (_LowPass * VenturiFlux) + ((1 - _LowPass) * vf);
 		return VenturiFlux;
 	}
 }
