@@ -48,7 +48,7 @@ typedef enum { OVS_256, OVS_512, OVS_1024, OVS_2048, OVS_4096 } t_ps_resolution;
 			uint8_t GetResolutionByteCodeTemp();
 			uint8_t GetResolutionByteCodePressure();
 			uint32_t GetResolutionDelay();
-			void UpdateBuffer(float P);
+
 
 			HW* hwi;
 			DebugIfaceClass* dbg;

@@ -10,26 +10,8 @@
 #endif
 #include "HAL.h"
 #include "SystemStatus.h"
+#include "generic_definitions.h"
 
-
-typedef enum {
-    PRESSURE_DROP_INHALE,
-    UNABLE_TO_READ_SENSOR_PRESSURE,
-    UNABLE_TO_READ_SENSOR_FLUX,
-    UNABLE_TO_READ_SENSOR_VENTURI,
-    ALARM_COMPLETE_OCCLUSION,
-    ALARM_PARTIAL_OCCLUSION,
-    ALARM_PRESSURE_INSIDE_TOO_HIGH,
-    ALARM_PRESSURE_INSIDE_TOO_LOW,
-    ALARM_LEAKAGE,
-    BATTERY_LOW,
-    ALARM_PRESSURE_INPUT_TOO_LOW,
-    ALARM_PRESSURE_INPUT_TOO_HIGH,
-    ALARM_GUI_ALARM,
-    ALARM_GUI_WDOG,
-    UNPREDICTABLE_CODE_EXECUTION
-
-} t_ALARM;
 
 class AlarmClass
 {
@@ -56,6 +38,11 @@ private:
     bool isInAlarm;
     bool led_on;
     bool wdog_enable;
+    float P0Loop;
+    float P0Patient;
+    
+    CircularBuffer* CycleCyclePLoop;
+    CircularBuffer* CycleCyclePPatient;
 
 public:
 	void Action_OverPressureSecurity();

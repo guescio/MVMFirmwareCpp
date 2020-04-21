@@ -49,5 +49,7 @@ typedef struct
 
     bool pcv_trigger_enable;
     float pcv_trigger;
+
+    float pause_timeout;
     
 } t_config;

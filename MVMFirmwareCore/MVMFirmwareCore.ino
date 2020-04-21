@@ -6,6 +6,8 @@
 
 // the setup function runs once when you press reset or power the board
 
+#include "driver_OxygenSensor.h"
+#include "driver_ADS1115.h"
 #include "TidalVolume.h"
 #include "Alarms.h"
 #include "MVM_StateMachine.h"

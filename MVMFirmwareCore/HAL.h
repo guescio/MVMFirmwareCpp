@@ -14,9 +14,12 @@
 #include "DebugIface.h"
 #include "driver_5525DSO.h"
 #include "driver_SFM3019.h"
+#include "driver_ADS1115.h"
 #include "driver_VenturiFlowMeter.h"
+#include "driver_OxygenSensor.h"
 #include "PressureLoop.h"
 #include "CircularBuffer.h"
+#include "generic_definitions.h"
 
 class HAL
 {
@@ -26,7 +29,9 @@ class HAL
 		Sensor5525DSO drv_PPatient;
 		Sensor5525DSO drv_PVenturi;
 		SensorSFM3019 drv_FlowIn;
+		ADC_ADS1115 drv_ADC0;
 		VenturiFlowMeter drv_FlowVenturi;
+		OxygenSensor drv_OxygenSensor;
 		PressureLoopClass PressureLoop;
 		DriverContext _dc;
 		CircularBuffer *MEM_PLoop;
@@ -47,6 +52,12 @@ class HAL
 		float FlowIn, TFlowIn;
 		float Tventuri, Pventuri;
 		float FlowVenturi;
+		float Oxygen;
+		float VoltageReference;
+		float VoltageProbe12V;
+		float VoltageProbe5V;
+
+		
 		
 	public:
 		DebugIfaceClass dbg;
@@ -73,12 +84,22 @@ class HAL
 		uint64_t GetMillis();
 		int64_t Get_dT_millis(uint64_t ms);
 		float ZeroPressureSensor(t_pressure_sensor ps);
+		void SetZeroPressureSensor(t_pressure_sensor ps, float value);
 		void delay_ms(float ms);
+		float GetOxygen();
+		void CalibrateOxygenSensorInAir();
+		void CalibrateOxygenSensorInPureOxygen();
+		void TriggerAlarm(t_ALARM alarm_code);
+
+		uint8_t _adc_channel;
+		float ADC_Results[4];
 
 		std::function<void()> callback_ploop = NULL;
 		std::function<void()> callback_ppatient = NULL;
 		std::function<void()> callback_flowsens = NULL;
 		std::function<void()> callback_venturi = NULL;
+		
+		std::function<void(t_ALARM alarm_code)> callback_alarm = NULL;
 
 		void addHandler_PLoop(std::function<void()> callback)
 		{
@@ -98,6 +119,11 @@ class HAL
 		void addHandler_FlowVenturi(std::function<void()> callback)
 		{
 			callback_venturi = callback;
+		}
+
+		void addHandler_HardwareAlarm(std::function<void(t_ALARM alarm_code)> callback)
+		{
+			callback_alarm = callback;
 		}
 
 

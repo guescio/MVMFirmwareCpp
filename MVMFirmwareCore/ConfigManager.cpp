@@ -157,6 +157,7 @@ bool ConfigManagerClass::SetParameter(String p, String v)
     if (strPatam == "pause_inhale") {
         int numberValue = v.toInt();
         core_config.pause_inhale = numberValue;
+        core_config.pause_timeout = 500 ;
         bres = true;
     }
 
@@ -181,6 +182,7 @@ bool ConfigManagerClass::SetParameter(String p, String v)
     if (strPatam == "pause_exhale") {
         int numberValue = v.toInt();
         core_config.pause_exhale = numberValue;
+        core_config.pause_timeout = 500;
         bres = true;
     }
 
@@ -243,6 +245,13 @@ bool ConfigManagerClass::SetParameter(String p, String v)
 
     if (strPatam == "stats_clear") {
         //ResetStatsBegin();
+        bres = true;
+    }
+
+    if (strPatam == "backup_min_rate") {
+        float numberValue = v.toFloat();
+        numberValue = numberValue < 1 ? 1 : numberValue;
+        core_config.backup_min_rate = numberValue;
         bres = true;
     }
 
@@ -390,6 +399,11 @@ String ConfigManagerClass::GetParameter(String p)
                 outval += String(zeros[i]);
         }
         return outval;
+    }
+
+    if (strPatam == "calib_o2") {
+        ((MVMCore*)core)->CalibrateOxygenSensor();
+        return "valore=OK";
     }
 
     if (strPatam == "calibv") {

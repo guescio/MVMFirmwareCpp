@@ -31,7 +31,7 @@ typedef enum {
 class MVM_StateMachine
 {
 public:
-	void Init(HAL* _MVM_HAL, t_config* core_config, t_SystemStatus* sys_c, int32_t _dT);
+	void Init(HAL* _MVM_HAL, AlarmClass *_MVM_Alarms, t_config* core_config, t_SystemStatus* sys_c, int32_t _dT);
 	void Tick();
 	uint32_t dbg_state_machine;
 	
@@ -61,6 +61,7 @@ private:
 	uint64_t cycle_SMTick;
 	HAL* MVM_HAL;
 	t_config* core_config;
+	AlarmClass* MVM_Alarms;
 	t_SystemStatus* sys_c;
 	t_mvm_sm mvm_sm;
 

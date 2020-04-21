@@ -73,7 +73,7 @@ bool HW_V3::I2CWrite(t_i2cdevices device, uint8_t* wbuffer, int wlength, bool st
 	uint8_t result;
 	t_i2cdev dev = GetIICDevice(device);
 	address = dev.address;
-	//i2c_MuxSelect(dev.muxport);
+	i2c_MuxSelect(dev.muxport);
 
 	Wire.beginTransmission(address);
 	for (int i=0;i< wlength; i++)
@@ -93,7 +93,7 @@ bool HW_V3::I2CRead(t_i2cdevices device, uint8_t* wbuffer, int wlength, uint8_t*
 
 	t_i2cdev dev = GetIICDevice(device);
 	address = dev.address;
-	//i2c_MuxSelect(dev.muxport);
+	i2c_MuxSelect(dev.muxport);
 
 	Wire.beginTransmission(address);
 	for (int i = 0;i < wlength; i++)

@@ -168,9 +168,10 @@ bool Sensor5525DSO::asyncGetResult(float* P, float* T)
 
     if (!_initialized) return false;
 
-    if (hwi->Get_dT_millis(__last_millis) < GetResolutionDelay())
-        return false;
     if (!__pending_meas)
+        return false;
+
+    if (hwi->Get_dT_millis(__last_millis) < GetResolutionDelay())
         return false;
 
     __pending_meas = false;

@@ -6,6 +6,7 @@
 
 #include "MVMCore.h"
 #include <functional>
+using namespace std::placeholders; 
 
 void MVMCore::Init()
 {
@@ -23,6 +24,7 @@ void MVMCore::Init()
 	MVM_HAL.addHandler_PPatient(std::bind(&MVMCore::PPatient_Event, this));
 	MVM_HAL.addHandler_FlowSens(std::bind(&MVMCore::FlowIn_Event, this));
 	MVM_HAL.addHandler_FlowVenturi(std::bind(&MVMCore::FlowVenturi_Event, this));
+	MVM_HAL.addHandler_HardwareAlarm(std::bind(&MVMCore::HardwareAlarm_Event, this, _1));
 	
 
 	MEM_Ppatient_LP = new CircularBuffer(10);
@@ -33,7 +35,7 @@ void MVMCore::Init()
 	
 	Alarms.Init(&MVM_HAL, &sys_s);
 
-	MVM_SM.Init(&MVM_HAL, &CMC.core_config, &sys_s, 10);
+	MVM_SM.Init(&MVM_HAL, &Alarms, &CMC.core_config, &sys_s, 10);
 
 	averaged_PPatient = 0;
 	
@@ -150,6 +152,8 @@ void MVMCore::FlowVenturi_Event()
 
 void MVMCore::NewCycle_Event()
 {
+	MVM_HAL.SetZeroPressureSensor(PS_VENTURI, sys_s.dt_veturi_100ms);
+
 	TidalVolumeExt.DoNewCycle();
 	float dTact = (float)MVM_HAL.Get_dT_millis(last_respiratory_act);
 	last_respiratory_act = MVM_HAL.GetMillis();
@@ -184,6 +188,7 @@ void MVMCore::EndCycle_Event()
 	sys_s.currentTvEsp = TidalVolumeExt.currentTvEsp;
 }
 
+
 void MVMCore::ConfigurationChanged_Event()
 {
 	MVM_HAL.ConfigureInputValvePID(CMC.core_config.P,
@@ -195,6 +200,13 @@ void MVMCore::ConfigurationChanged_Event()
 		CMC.core_config.pid_limit
 	);
 }
+
+
+void MVMCore::HardwareAlarm_Event(t_ALARM alarm_code)
+{
+	Alarms.TriggerAlarm(alarm_code);
+}
+
 
 void MVMCore::ZeroSensors(float *sensors, int *count)
 {
@@ -213,10 +225,31 @@ void MVMCore::ZeroSensors(float *sensors, int *count)
 
 void MVMCore::CalibrateOxygenSensor()
 {
+	MVM_HAL.CalibrateOxygenSensorInAir();
 	//TODO
 }
 
-void MVMCore::FlushPipes(bool run)
+bool MVMCore::FlushPipes(bool run)
 {
+	if (!CMC.core_config.run)
+	{
+		if (run)
+		{
+			MVM_HAL.SetOutputValve(true);
+			MVM_HAL.SetInputValve(40);
+		}
+		else
+		{
+			MVM_HAL.SetOutputValve(true);
+			MVM_HAL.SetInputValve(0);
+		}
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
 	//TODO
 }
+

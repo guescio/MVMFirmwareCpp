@@ -13,6 +13,9 @@ void AlarmClass::Init(HAL* hal, t_SystemStatus* sys_c)
     led_on = false;
     isInAlarm = false;
     wdog_enable = false;
+
+    CycleCyclePLoop = new CircularBuffer(5);
+    CycleCyclePPatient = new CircularBuffer(5);
 }
 
 void AlarmClass::Tick()
@@ -367,11 +370,13 @@ void AlarmClass::ResetAlarm()
 
 void AlarmClass::TransitionNewCycleEvent()
 {
-
+    P0Loop = _sys_c->pLoop;
+    P0Patient = _sys_c->pPatient;
 }
 
 void AlarmClass::TransitionInhaleExhale_Event()
 {
+    float dPPatient, dPLoop;
     if (_sys_c->pLoop < 0.5 * _sys_c->current_pressure_setpoint)
     {
         TriggerAlarm(ALARM_PRESSURE_INSIDE_TOO_LOW);
@@ -381,6 +386,22 @@ void AlarmClass::TransitionInhaleExhale_Event()
     {
         TriggerAlarm(ALARM_LEAKAGE);
     }
+
+    dPPatient = fabs(_sys_c->pPatient - P0Patient);
+    dPLoop = fabs(_sys_c->pLoop - P0Loop);
+
+    CycleCyclePLoop->PushData(dPLoop);
+    CycleCyclePPatient->PushData(dPPatient);
+
+    if ((CycleCyclePLoop->GetData(1) > 2 * CycleCyclePPatient->GetData(1)) &&
+        (CycleCyclePLoop->GetData(0) > 2 * CycleCyclePPatient->GetData(0)))
+        TriggerAlarm(ALARM_PARTIAL_OCCLUSION);
+
+    if ((CycleCyclePLoop->GetData(1) > 5) &&
+            (CycleCyclePLoop->GetData(0) > 5) &&
+            (CycleCyclePPatient->GetData(1) < 1.5) &&
+            (CycleCyclePPatient->GetData(0) < 1.5))
+        TriggerAlarm(ALARM_COMPLETE_OCCLUSION);
 
 }
 

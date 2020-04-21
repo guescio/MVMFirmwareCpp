@@ -12,7 +12,7 @@
 #include "SystemStatus.h"
 #include "Alarms.h"
 
-class ConfigManagerClass
+class ConfigManagerClass 
 {
  protected:
 

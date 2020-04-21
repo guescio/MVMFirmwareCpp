@@ -1,5 +1,5 @@
 // MVMCore.h
-#pragma once
+
 #ifndef _MVMCORE_h
 #define _MVMCORE_h
 
@@ -9,11 +9,12 @@
 	#include "WProgram.h"
 #endif
 
-#include "ConfigManager.h"
+
 #include "HAL.h"
 #include "MVM_StateMachine.h"
 #include "Alarms.h"
 #include "TidalVolume.h"
+#include "ConfigManager.h"
 
 class MVMCore
 {
@@ -26,7 +27,7 @@ public:
 	bool SetParameter(String p, String v);
 	String GetParameter(String p);
 	void ZeroSensors(float *sensors, int *count);
-	void FlushPipes(bool run);
+	bool FlushPipes(bool run);
 	void CalibrateOxygenSensor();
 	
 private:
@@ -54,6 +55,7 @@ private:
 	void Exhale_Event();
 	void EndCycle_Event();
 	void ConfigurationChanged_Event();
+	void HardwareAlarm_Event(t_ALARM alarm_code);
 };
 #endif
 

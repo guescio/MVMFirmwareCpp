@@ -5,9 +5,10 @@
 #include "MVM_StateMachine.h"
 
 
-void MVM_StateMachine::Init(HAL* _MVM_HAL, t_config* _core_config, t_SystemStatus* _sys_c, int32_t _dT)
+void MVM_StateMachine::Init(HAL* _MVM_HAL, AlarmClass *_MVM_Alarms, t_config* _core_config, t_SystemStatus* _sys_c, int32_t _dT)
 {
-	MVM_HAL = _MVM_HAL;
+    MVM_HAL = _MVM_HAL;
+    MVM_Alarms = _MVM_Alarms;
 	core_config = _core_config;
 	sys_c = _sys_c;
 	cycle_SMTick = MVM_HAL->GetMillis();
@@ -98,7 +99,7 @@ void MVM_StateMachine::SMExecute()
                 }
                 else {
                     //WE SHOULD NEVER GO HERE
-                    //TriggerAlarm(UNPREDICTABLE_CODE_EXECUTION);
+                    MVM_Alarms->TriggerAlarm(UNPREDICTABLE_CODE_EXECUTION);
                 }
             }
         }
@@ -266,9 +267,20 @@ void MVM_StateMachine::SMExecute()
         break;
     default:
         dbg_state_machine = 1000;
-        //TriggerAlarm(UNPREDICTABLE_CODE_EXECUTION);
-        //CoreSM_FORCE_ChangeState(&core_sm_context.force_sm, FR_OPEN_INVALVE);
+        MVM_Alarms->TriggerAlarm(UNPREDICTABLE_CODE_EXECUTION);
+        mvm_sm = FR_OPEN_INVALVE;
         break;
+    }
+
+    if (core_config->pause_timeout > 0)
+    {
+        core_config->pause_timeout-=dT;
+
+    }
+    else
+    {
+        core_config->pause_inhale = false;
+        core_config->pause_exhale = false;
     }
     
 }
