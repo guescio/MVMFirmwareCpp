@@ -81,6 +81,15 @@
     <ClInclude Include="TidalVolume.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UtilsFn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="driver_ADS1115.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="driver_OxygenSensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HAL.cpp">
@@ -126,6 +135,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TidalVolume.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="driver_ADS1115.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="driver_OxygenSensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
