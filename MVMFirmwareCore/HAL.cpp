@@ -60,12 +60,13 @@ void HAL::Tick()
 {
 	uint32_t ADC_LastResult;
 
-	hwi.Tick();
+
 	PressureLoop.Tick();
 	hwi.PWMSet(PWM_PV1,PressureLoop.GetValveControl());
 	
 	if (hwi.Get_dT_millis(cycle_LT) >= 1)
 	{
+		
 		cycle_LT = hwi.GetMillis();
 		if (hwi.Get_dT_millis(cycle_PLoop_LT) > SCHEDULER_TIMER_PLOOP)
 		{
@@ -198,7 +199,7 @@ void HAL::Tick()
 		else
 		{
 
-			
+			hwi.Tick();
 		}
 	}
 }

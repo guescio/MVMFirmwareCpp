@@ -45,6 +45,8 @@ void AlarmClass::Tick()
 
     Sound();
     AlarmActions();
+
+    _sys_c->ALARM_FLAG = ALARM_FLAG_FILTERED;
 }
 
 void AlarmClass::AlarmActions()
@@ -255,6 +257,7 @@ void AlarmClass::CheckStaticAlarms()
         TriggerAlarm(BATTERY_LOW);
     }
 
+    
     if (_sys_c->pPatient > 50)
     {
         TriggerAlarm(ALARM_PRESSURE_INSIDE_TOO_HIGH);

@@ -16,10 +16,10 @@ void PressureLoopClass::Init(float fast_ms, int32_t LoopRatio, void* handle)
     _LoopRatio = LoopRatio;
     LoopCounter = 0;
     _PID_P = 70;
-    _PID_I = 1000;
+    _PID_I = 500;
     _PID_D = 0;
     _PID_P2 = 1.2;
-    _PID_I2 = 16;
+    _PID_I2 = 12;
     _PID_D2 = 0;
     _pid_limit = 0.55;
     _filter_fast = 0.9;

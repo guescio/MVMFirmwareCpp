@@ -32,6 +32,9 @@ void MVMCore::Init()
 	MEM_Ppatient_LP = new CircularBuffer(10);
 	
 	old_delta_ppatient = 0;
+	sys_s.pPatient = 0;
+	sys_s.pLoop = 0;
+	sys_s.FlowIn = 0;
 	
 	sys_s.batteryPowered = false;
 	sys_s.currentBatteryCharge = 100;
@@ -60,6 +63,7 @@ void MVMCore::Init()
 void MVMCore::Tick()
 {
 	MVM_HAL.Tick();
+	Alarms.Tick();
 	sys_s.pLoop = MVM_HAL.GetPressureValve(0);
 	sys_s.pPatient = MVM_HAL.GetPressurePatient(0);
 	sys_s.FlowIn = MVM_HAL.GetFlowInspire(0);
