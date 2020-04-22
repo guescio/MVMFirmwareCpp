@@ -89,13 +89,13 @@ void HAL::Tick()
 	PressureLoop.Tick();
 	hwi.PWMSet(PWM_PV1,PressureLoop.GetValveControl());
 	
-	if (hwi.Get_dT_millis(cycle_LT) >= 1)
+	if (hwi.Get_dT_millis(cycle_LT) >= 3)
 	{
 		
 
 		if (drv_PLoop.asyncGetResult(&Ploop, &Tloop))
 		{
-			if (fabs(Pventuri) < 150)
+			if (fabs(Ploop) < 150)
 			{
 				MEM_PLoop->PushData(Ploop);
 				PressureLoop.SetPressure(PRESSURE_VALVE, Ploop);
@@ -106,7 +106,7 @@ void HAL::Tick()
 		}
 		else if (drv_PPatient.asyncGetResult(&Ppatient, &Tpatient))
 		{
-			if (fabs(Pventuri) < 150)
+			if (fabs(Ploop) < 150)
 			{
 				MEM_PPatient->PushData(Ppatient);
 				PressureLoop.SetPressure(PRESSURE_PATIENT, Ppatient);

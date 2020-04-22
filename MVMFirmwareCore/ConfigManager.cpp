@@ -29,14 +29,14 @@ void ConfigManagerClass::Init(void* _core, t_SystemStatus* _sys_s, AlarmClass *_
     core_config.exhale_ms = 60000.0 / core_config.respiratory_rate * (core_config.respiratory_ratio);
 
     core_config.P = 70;
-    core_config.I = 500;
+    core_config.I = 300;
     core_config.D = 0;
 
-    core_config.P2 = 1.4;
-    core_config.I2 = 10;
+    core_config.P2 = 1.2;
+    core_config.I2 = 0.4;
     core_config.D2 = 0;
 
-    core_config.pid_limit = 0.65;
+    core_config.pid_limit = 0.95;
 
     core_config.pause_lg = false;
     core_config.pause_lg_timer = 0;
