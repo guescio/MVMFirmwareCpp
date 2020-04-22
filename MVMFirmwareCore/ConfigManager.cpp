@@ -203,7 +203,7 @@ bool ConfigManagerClass::SetParameter(String p, String v)
 
     if (strPatam == "alarm") {
         int numberValue = v.toInt();
-        Alarms->TriggerAlarm(ALARM_GUI_ALARM);
+        Alarms->SetAlarmGUI(numberValue != 0 ?true:false);
         bres = true;
     }
 
@@ -229,6 +229,7 @@ bool ConfigManagerClass::SetParameter(String p, String v)
     if (strPatam == "wdenable") {
         int numberValue = v.toInt();
         core_config.__WDENABLE = numberValue != 0 ? true : false;
+        Alarms->ResetWatchDog();
         Alarms->EnableWatchDog(core_config.__WDENABLE);
         bres = true;
     }

@@ -116,7 +116,7 @@ class HAL
 		void TriggerAlarm(t_ALARM alarm_code);
 		float GetGasTemperature();
 		void GetPowerStatus(bool* batteryPowered, float* charge);
-
+		uint8_t i2c_scheduler;
 		uint8_t _adc_channel;
 		float ADC_Results[4];
 

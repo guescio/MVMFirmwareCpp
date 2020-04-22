@@ -61,6 +61,12 @@ bool Sensor5525DSO::Init(t_i2cdevices device, t_ps_sensor model, t_ps_resolution
     dbg->DbgPrint(DBG_KERNEL, DBG_INFO, "TREF:             " + String(sensorCT.C[4]));
     dbg->DbgPrint(DBG_KERNEL, DBG_INFO, "TEMPSENS:         " + String(sensorCT.C[5]));
 
+    uint32_t __chache_P;
+    uint32_t __chache_T;
+    int __TDiv;
+    __last_is_T=false;
+ 
+
    
     __chache_P=0;
     __chache_T=0;
@@ -75,6 +81,7 @@ bool Sensor5525DSO::Init(t_i2cdevices device, t_ps_sensor model, t_ps_resolution
         PBuffer[i] = 0;
     }*/
     _initialized = true;
+    __last_millis = hwi->GetMillis();
     return true;
 }
 bool Sensor5525DSO::doMeasure(float* P, float* T)

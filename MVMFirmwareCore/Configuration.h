@@ -43,9 +43,9 @@ typedef struct
     float pause_lg_p;
     bool pause_lg;
 
-    bool __CONSOLE_MODE;
-    bool __ADDTimeStamp;
-    bool __WDENABLE;
+    bool __CONSOLE_MODE = false;
+    bool __ADDTimeStamp = false;
+    bool __WDENABLE=false;
 
     bool pcv_trigger_enable;
     float pcv_trigger;

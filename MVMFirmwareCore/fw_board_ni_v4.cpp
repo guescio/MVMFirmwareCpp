@@ -74,16 +74,19 @@ bool HW_V4::Init()
 	iic_devs[6].address = 0x70;
 
 	iic_devs[7].t_device = IIC_GENERAL_CALL_SENSIRION;
-	iic_devs[7].muxport = 2;
+	iic_devs[7].muxport = 1;
 	iic_devs[7].address = 0x00;
 
 
 	batteryStatus_reading_LT = GetMillis();
 
 
-
+	currentBatteryCharge = 100;
+	pWall=true;
+	pIN=3;
+	BoardTemperature=25;
 	//init supervisor watchdog
-	//WriteSupervisor(0x00, 1);  //REMOVE COMMENT BEFORE RELEASE
+	WriteSupervisor(0x00, 0);  //REMOVE COMMENT BEFORE RELEASE
 }
 
 bool HW_V4::I2CWrite(t_i2cdevices device, uint8_t* wbuffer, int wlength, bool stop)
@@ -242,7 +245,7 @@ void HW_V4::Tick()
 		currentBatteryCharge = (float)ReadSupervisor(0x51);
 		currentBatteryCharge = currentBatteryCharge < 0 ? 0 : currentBatteryCharge;
 		currentBatteryCharge = currentBatteryCharge > 100 ? 100 : currentBatteryCharge;
-		pWall = ReadSupervisor(0x52) >0 ? true : false ;
+		pWall = ReadSupervisor(0x52) >0 ? false : true ;
 		pIN = ((float)ReadSupervisor(0x50));
 		BoardTemperature = ((float)ReadSupervisor(0x56)/10.0);
 		HW_AlarmsFlags = (uint16_t)ReadSupervisor(0x57);
@@ -255,6 +258,8 @@ void HW_V4::Tick()
 
 	return;
 }
+
+
 void HW_V4::GetPowerStatus(bool* batteryPowered, float* charge)
 {
 	*batteryPowered = pWall ? false:true;
@@ -339,7 +344,7 @@ void HW_V4::i2c_MuxSelect(uint8_t i)
 	Wire.beginTransmission(TCAADDR);
 	Wire.write(1 << i);
 	Wire.endTransmission();
-
+	delayMicroseconds(500);
 }
 
 t_i2cdev HW_V4::GetIICDevice(t_i2cdevices device)

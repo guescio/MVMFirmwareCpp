@@ -14,16 +14,16 @@ class TidalVolumeClass
 {
 private:
 	HAL* _HAL;
-	float TotalVolume;
-	float InspVolumeSensirion;
-	float InspVolumeVenturi;
-	float ExpVolumeVenturi;
+	float TotalVolume=0;
+	float InspVolumeSensirion=0;
+	float InspVolumeVenturi=0;
+	float ExpVolumeVenturi=0;
 	float TidalCorrection=1;
-	float FLUX;
+	float FLUX=0;
 	int Status=0;
 	uint64_t last_meas_t;
 	uint64_t last_meas_t_b;
-	float FluxMax;
+	float FluxMax=0;
 
 public:
 	float liveFlux;

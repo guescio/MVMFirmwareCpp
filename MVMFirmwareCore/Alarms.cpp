@@ -32,7 +32,7 @@ void AlarmClass::Tick()
     }
     else
     {
-        isInAlarm = true;
+        isInAlarm = false;
     }
 
     if (ALARM_FLAG_FILTERED != 0) {
@@ -57,7 +57,7 @@ void AlarmClass::AlarmActions()
         {
             blinker_led_time = _HAL->GetMillis();
             led_on = led_on ? false : true;
-            _HAL->SetAlarmLed(true);
+            _HAL->SetAlarmLed(led_on);
         }
         _HAL->SetAlarmRele(true);
     }
@@ -271,7 +271,7 @@ void AlarmClass::CheckStaticAlarms()
 
     if (wdog_enable)
     {
-        if (_HAL->Get_dT_millis(wdog_timer)>1000)
+        if (_HAL->Get_dT_millis(wdog_timer)>6000)
         {
             TriggerAlarm(ALARM_GUI_WDOG);
         }
@@ -380,9 +380,22 @@ void AlarmClass::TriggerAlarm(t_ALARM Alarm)
     
 }
 
+void AlarmClass::SetAlarmGUI(bool in_alarm)
+{
+    if (in_alarm)
+    {
+        TriggerAlarm(ALARM_GUI_ALARM);
+    }
+    else   
+    {
+        ALARM_FLAG = ALARM_FLAG & (~GenerateFlag(__ERROR_ALARM_PI));
+    }
+
+}
+
 void AlarmClass::ResetAlarm()
 {
-    ALARM_FLAG_SNOOZE = ALARM_FLAG & (~GenerateFlag(__ERROR_ALARM_PI));
+    ALARM_FLAG_SNOOZE = ALARM_FLAG ;
     ALARM_FLAG_SNOOZE_millis = _HAL->GetMillis();
 }
 

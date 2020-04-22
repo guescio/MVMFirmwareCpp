@@ -29,17 +29,17 @@ private:
     uint32_t ALARM_FLAG_FILTERED = 0x0;
     uint64_t ALARM_FLAG_SNOOZE_millis = 0;
 
-    int alarm_state;
+    int alarm_state=0;
 
     uint64_t buzzer_time;
     uint64_t blinker_led_time;
     uint64_t wdog_timer;
-    bool AlarmSound;
-    bool isInAlarm;
-    bool led_on;
-    bool wdog_enable;
-    float P0Loop;
-    float P0Patient;
+    bool AlarmSound=false;
+    bool isInAlarm = false;
+    bool led_on = false;
+    bool wdog_enable=false;
+    float P0Loop=0;
+    float P0Patient=0;
     
     CircularBuffer* CycleCyclePLoop;
     CircularBuffer* CycleCyclePPatient;
@@ -55,6 +55,7 @@ public:
     void Tick();
     void ResetWatchDog();
     void EnableWatchDog(bool enable);
+    void SetAlarmGUI(bool in_alarm);
 };
 
 #endif

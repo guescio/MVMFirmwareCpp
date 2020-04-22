@@ -59,11 +59,13 @@ void MVMCore::Init()
 	MVM_HAL.SetOutputValve(false);
 
 	last_debug_console_log = MVM_HAL.GetMillis();
+	last_alarm_CT = MVM_HAL.GetMillis();
+	alarm_enable = false;
 }
 void MVMCore::Tick()
 {
 	MVM_HAL.Tick();
-	Alarms.Tick();
+
 	sys_s.pLoop = MVM_HAL.GetPressureValve(0);
 	sys_s.pPatient = MVM_HAL.GetPressurePatient(0);
 	sys_s.FlowIn = MVM_HAL.GetFlowInspire(0);
@@ -81,6 +83,15 @@ void MVMCore::Tick()
 			MVMDebugPrintLogger();
 		}
 	}
+
+	if (MVM_HAL.Get_dT_millis(last_alarm_CT) > 5000)
+	{
+		alarm_enable = true;
+		
+	}
+	
+	if (alarm_enable)
+		Alarms.Tick();
 }
 
 bool MVMCore::DataAvailableOnUART0()

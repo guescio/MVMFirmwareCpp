@@ -406,23 +406,23 @@ bool SensorSFM3019::Init(t_i2cdevices device, void* hw_handle)
         return false;
     }
 
-
-
+    int16_t error;
+    
     /* Reset all I2C devices */
-    int16_t error = sensirion_i2c_general_call_reset();
+    error = sensirion_i2c_general_call_reset();
     if (error) {
         dbg->DbgPrint(DBG_KERNEL, DBG_ERROR, "General call reset failed");
         return false;
     }
     /* Wait for the SFM3019 to initialize */
-    sensirion_sleep_usec(SFM3019_SOFT_RESET_TIME_US);
+    sensirion_sleep_usec(SFM3019_SOFT_RESET_TIME_US*4);
 
     uint32_t timeout = millis();
     while (sfm3019_probe()) {
         dbg->DbgPrint(DBG_KERNEL, DBG_ERROR, "SFM sensor probing failed");
         if (millis() - timeout > 1000)
             return false;
-        delay(10);
+        hwi->__delay_blocking_ms(10);
     }
 
     uint32_t product_number = 0;
@@ -434,12 +434,13 @@ bool SensorSFM3019::Init(t_i2cdevices device, void* hw_handle)
         return false;
     }
     else {
-        dbg->DbgPrint(DBG_KERNEL, DBG_INFO, "Product: " + String(product_number));
+        dbg->DbgPrint(DBG_KERNEL, DBG_WARNING, "Product: " + String(product_number));
         for (size_t i = 0; i < 8; ++i) {
-            dbg->DbgPrint(DBG_KERNEL, DBG_INFO, String(serial_number[i]));
+            dbg->DbgPrint(DBG_KERNEL, DBG_WARNING, String(serial_number[i]));
         }
     }
 
+    hwi->__delay_blocking_ms(1000);
     sfm3019 = sfm3019_create();
 
     error = sfm_common_start_continuous_measurement(

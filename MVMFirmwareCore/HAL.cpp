@@ -22,11 +22,14 @@ void HAL::Init()
 	dbg.Init(DBG_WARNING, &hwi);
 	_dc.hwi = &hwi;
 	_dc.dbg = &dbg;
+	
+	drv_FlowIn.Init(IIC_FLOW1, &_dc);
+
 	drv_PLoop.Init(IIC_PS_0, PLOOP_MODEL, OVS_1024, &_dc);
 	drv_PPatient.Init(IIC_PS_1, PPATIENT_MODEL, OVS_1024, &_dc);
 	drv_PVenturi.Init(IIC_PS_2, PVENTURI, OVS_1024, &_dc);
 	drv_FlowVenturi.Init(SpiroquantH_R122P04);
-	drv_FlowIn.Init(IIC_FLOW1, &_dc);
+
 	PressureLoop.Init(5, 5, &_dc);
 	drv_ADC0.Init(IIC_ADC_0, &_dc);
 	drv_OxygenSensor.Init(OxygenSensorA, &_dc);
@@ -48,6 +51,28 @@ void HAL::Init()
 
 	_adc_channel = 0;
 
+	Tloop = 0;
+	Ploop = 0;
+	Tpatient = 0; 
+	Ppatient = 0;
+	FlowIn = 0;
+	TFlowIn = 0;
+	Tventuri = 0;
+	Pventuri = 0;
+	FlowVenturi = 0;
+	Oxygen = 0;
+	VoltageReference = 2.5;
+	VoltageProbe12V = 12;
+	VoltageProbe5V = 5;
+	_InputValveValue = 0;
+	_OutputValveValue = 0;
+	GasTemperature = 0;
+
+	Pin = 0;
+	BoardTemperature = 0;
+	SupervisorAlarms=0;
+	i2c_scheduler = 0;
+
 	//hwi->addHandler(std::bind(&HAL::Callback, this, 1));
 }
 /*
@@ -67,66 +92,8 @@ void HAL::Tick()
 	if (hwi.Get_dT_millis(cycle_LT) >= 1)
 	{
 		
-		cycle_LT = hwi.GetMillis();
-		if (hwi.Get_dT_millis(cycle_PLoop_LT) > SCHEDULER_TIMER_PLOOP)
-		{
-			cycle_PLoop_LT = hwi.GetMillis();
-			if (!drv_PLoop.asyncMeasure())
-				TriggerAlarm(UNABLE_TO_READ_SENSOR_PRESSURE);
-			dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - Start Measure");
 
-		}
-		else if (hwi.Get_dT_millis(cycle_PPatient_LT) > SCHEDULER_TIMER_PPATIENT)
-		{
-			cycle_PPatient_LT = hwi.GetMillis();
-			if (!drv_PPatient.asyncMeasure())
-				TriggerAlarm(UNABLE_TO_READ_SENSOR_PRESSURE);
-
-		}
-		else if (hwi.Get_dT_millis(cycle_PVenturi_LT) > SCHEDULER_TIMER_PVENTURI)
-		{
-			cycle_PVenturi_LT = hwi.GetMillis();
-			if (!drv_PVenturi.asyncMeasure())
-				TriggerAlarm(UNABLE_TO_READ_SENSOR_VENTURI);
-		}
-		else if (hwi.Get_dT_millis(cycle_ADC_LT) > SCHEDULER_TIMER_ADC)
-		{
-			cycle_ADC_LT = hwi.GetMillis();
-			drv_ADC0.asyncMeasure(_adc_channel);
-		}
-		else if (hwi.Get_dT_millis(cycle_Supervisor_LT) > SCHEDULER_TIMER_SUPERVISOR)
-		{
-			cycle_Supervisor_LT = hwi.GetMillis();
-
-			Pin = hwi.GetPIN();
-			BoardTemperature = hwi.GetBoardTemperature();
-			SupervisorAlarms = hwi.GetSupervisorAlarms();
-
-			//Check supervisors alarms
-			if (SupervisorAlarms != 0)
-			{
-				TriggerAlarm(ALARM_SUPERVISOR);
-			}
-
-			//Pressure Alarms
-			if (Pin > MAX_PIN)
-			{
-				TriggerAlarm(ALARM_PRESSURE_INPUT_TOO_HIGH);
-			}
-
-			if ((_InputValveValue > 0) && (Pin < MIN_PIN))
-			{
-				TriggerAlarm(ALARM_PRESSURE_INPUT_TOO_LOW);
-			}
-
-			//Check board temperature
-			if (BoardTemperature > 75)
-			{
-				TriggerAlarm(ALARM_OVERTEMPERATURE);
-			}
-
-		}
-		else if (drv_PLoop.asyncGetResult(&Ploop, &Tloop))
+		if (drv_PLoop.asyncGetResult(&Ploop, &Tloop))
 		{
 			MEM_PLoop->PushData(Ploop);
 			PressureLoop.SetPressure(PRESSURE_VALVE, Ploop);
@@ -154,7 +121,7 @@ void HAL::Tick()
 		else if (drv_ADC0.asyncGetResult(&ADC_LastResult))
 		{
 			ADC_Results[_adc_channel] = ADC_LastResult;
-
+#ifdef HARDWARE_TARGET_PLATFORM_V4
 			if (_adc_channel == 0)
 			{
 				drv_OxygenSensor.setData(ADC_Results[_adc_channel], Tloop);
@@ -184,23 +151,115 @@ void HAL::Tick()
 
 			_adc_channel++;
 			if (_adc_channel > 3) _adc_channel = 0;
-		}
-		else if (hwi.Get_dT_millis(cycle_FlowIn_LT) > SCHEDULER_TIMER_FLOWIN)
-		{
-			cycle_FlowIn_LT = hwi.GetMillis();
-			if (!drv_FlowIn.doMeasure(&FlowIn, &TFlowIn))
-				TriggerAlarm(UNABLE_TO_READ_SENSOR_FLUX);
-			MEM_FlowIn->PushData(FlowIn);
-			GasTemperature = TFlowIn;
-			dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - Flow: " + String(FlowIn));
-			if (callback_flowsens)
-				callback_flowsens();
+#endif
 		}
 		else
 		{
+			switch (i2c_scheduler)
+			{
+			case 0:
+				if (hwi.Get_dT_millis(cycle_PLoop_LT) > SCHEDULER_TIMER_PLOOP)
+				{
+					cycle_PLoop_LT = hwi.GetMillis();
+					if (!drv_PLoop.asyncMeasure())
+						TriggerAlarm(UNABLE_TO_READ_SENSOR_PRESSURE);
+				}
+				i2c_scheduler = 1;
+				break;
 
-			hwi.Tick();
+			case 1:
+				if (hwi.Get_dT_millis(cycle_PPatient_LT) > SCHEDULER_TIMER_PPATIENT)
+				{
+					cycle_PPatient_LT = hwi.GetMillis();
+					if (!drv_PPatient.asyncMeasure())
+						TriggerAlarm(UNABLE_TO_READ_SENSOR_PRESSURE);
+				}
+				i2c_scheduler = 2;
+				break;
+
+			case 2:
+				if (hwi.Get_dT_millis(cycle_PVenturi_LT) > SCHEDULER_TIMER_PVENTURI)
+				{
+					cycle_PVenturi_LT = hwi.GetMillis();
+					if (!drv_PVenturi.asyncMeasure())
+						TriggerAlarm(UNABLE_TO_READ_SENSOR_VENTURI);
+				}
+				i2c_scheduler = 3;
+				break;
+
+			case 3:
+				if (hwi.Get_dT_millis(cycle_ADC_LT) > SCHEDULER_TIMER_ADC)
+				{
+					cycle_ADC_LT = hwi.GetMillis();
+					drv_ADC0.asyncMeasure(_adc_channel);
+				}
+				i2c_scheduler = 4;
+				break;
+			case 4:
+				if (hwi.Get_dT_millis(cycle_Supervisor_LT) > SCHEDULER_TIMER_SUPERVISOR)
+				{
+					cycle_Supervisor_LT = hwi.GetMillis();
+
+					Pin = hwi.GetPIN();
+					BoardTemperature = hwi.GetBoardTemperature();
+					SupervisorAlarms = hwi.GetSupervisorAlarms();
+
+					//Check supervisors alarms
+					if (SupervisorAlarms != 0)
+					{
+						TriggerAlarm(ALARM_SUPERVISOR);
+					}
+
+					//Pressure Alarms
+					if (Pin > MAX_PIN)
+					{
+						TriggerAlarm(ALARM_PRESSURE_INPUT_TOO_HIGH);
+					}
+
+					if ((_InputValveValue > 0) && (Pin < MIN_PIN))
+					{
+						TriggerAlarm(ALARM_PRESSURE_INPUT_TOO_LOW);
+					}
+
+					//Check board temperature
+					if (BoardTemperature > 75)
+					{
+						TriggerAlarm(ALARM_OVERTEMPERATURE);
+					}
+
+				}
+				i2c_scheduler = 5;
+				break;
+
+			case 5:
+				if (hwi.Get_dT_millis(cycle_FlowIn_LT) > SCHEDULER_TIMER_FLOWIN)
+				{
+					cycle_FlowIn_LT = hwi.GetMillis();
+					if (!drv_FlowIn.doMeasure(&FlowIn, &TFlowIn))
+						TriggerAlarm(UNABLE_TO_READ_SENSOR_FLUX);
+					MEM_FlowIn->PushData(FlowIn);
+					GasTemperature = TFlowIn;
+					dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - Flow: " + String(FlowIn));
+					if (callback_flowsens)
+						callback_flowsens();
+				}
+				i2c_scheduler = 6;
+				break;
+			case 6:
+				hwi.Tick();
+				i2c_scheduler = 0;
+				break;
+			}
 		}
+
+		cycle_LT = hwi.GetMillis();
+		
+
+		
+		
+
+		
+		
 	}
 }
 

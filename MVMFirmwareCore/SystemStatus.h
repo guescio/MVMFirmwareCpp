@@ -43,12 +43,12 @@ typedef struct
 
 typedef struct
 {
-    float current_pressure_setpoint;
-	float pLoop;
-	float pPatient;
-    float pPatient_low_passed;
-	float FlowIn;
-	float FlowVenturi;
+    float current_pressure_setpoint=0;
+	float pLoop = 0;
+	float pPatient = 0;
+    float pPatient_low_passed = 0;
+	float FlowIn = 0;
+	float FlowVenturi = 0;
     
 
     float last_O2 = 21.7;
@@ -70,24 +70,24 @@ typedef struct
     float Flux = 0;
 
 
-    float PPatient_delta;
-    float PPatient_delta2;
-    float PPatient_lowpass;
+    float PPatient_delta = 0;
+    float PPatient_delta2 = 0;
+    float PPatient_lowpass = 0;
 
-    int dbg_trigger;
-    float dgb_peaktime;
+    int dbg_trigger = 0;
+    float dgb_peaktime = 0;
     float fluxpeak = 0;
     float pres_peak = 0;
     
     float dt_veturi_100ms = 0;
 
-    float pid_valvein_slow;
-    float pid_valvein_fast;
+    float pid_valvein_slow = 0;
+    float pid_valvein_fast = 0;
 
     t_stat_param __stat_param;
 
-    uint32_t ALARM_FLAG;
-    uint32_t WARNING_FLAG;
+    uint32_t ALARM_FLAG = 0;
+    uint32_t WARNING_FLAG = 0;
 
-    bool in_over_pressure_emergency;
+    bool in_over_pressure_emergency = false;
 } t_SystemStatus;

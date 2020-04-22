@@ -20,6 +20,12 @@ void OxygenSensor::Init(t_OxygenSensorModel model, void* handle)
 		calib_interval_seconds = 3600 * 24 * 7;		//7 days
 	}
 	
+	
+	_adc_oxygen=0;
+	_temperature=0;
+	calib_second_counter=0;
+	second_counter=0;
+
 	second_counter = hwi->GetMillis();
 }
 float OxygenSensor::GetConcentration()

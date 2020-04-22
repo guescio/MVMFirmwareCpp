@@ -10,6 +10,7 @@ void VenturiFlowMeter::Init(t_VenturiSensorModel model)
 	_model = model;
 	VenturiFlux = 0;
 	Integral = 0;
+
 }
 
 float VenturiFlowMeter::GetFlow(float pressure, float temperature)

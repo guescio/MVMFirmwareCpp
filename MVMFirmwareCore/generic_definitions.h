@@ -15,7 +15,7 @@
 
 #include <stdint.h>
 
-//#define HARDWARE_TARGET_PLATFORM_V3
+//#define HARDWARE_TARGET_PLATFORM_V3 1
 #define HARDWARE_TARGET_PLATFORM_V4 1
 
 typedef enum { PWM_PV1 } hw_pwm;

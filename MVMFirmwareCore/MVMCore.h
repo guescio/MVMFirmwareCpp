@@ -46,6 +46,8 @@ private:
 	float averaged_PPatient;
 
 	uint64_t last_debug_console_log;
+	uint64_t last_alarm_CT;
+	bool alarm_enable;
 
 	void PPatient_Event();
 	void FlowIn_Event();
