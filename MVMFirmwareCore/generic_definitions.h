@@ -63,7 +63,7 @@ typedef struct
 
 //ACCEPTED INPUT PRESSURE (mbar)
 #define MIN_PIN 3000
-#define MAX_PIN 6000
+#define MAX_PIN 4500
 
 typedef enum {
 	PRESSURE_DROP_INHALE,

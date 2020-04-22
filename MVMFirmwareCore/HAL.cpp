@@ -95,28 +95,37 @@ void HAL::Tick()
 
 		if (drv_PLoop.asyncGetResult(&Ploop, &Tloop))
 		{
-			MEM_PLoop->PushData(Ploop);
-			PressureLoop.SetPressure(PRESSURE_VALVE, Ploop);
-			dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - Ploop: " + String(Ploop));
-			if (callback_ploop)
-				callback_ploop();
+			if (fabs(Pventuri) < 150)
+			{
+				MEM_PLoop->PushData(Ploop);
+				PressureLoop.SetPressure(PRESSURE_VALVE, Ploop);
+				dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - Ploop: " + String(Ploop));
+				if (callback_ploop)
+					callback_ploop();
+			}
 		}
 		else if (drv_PPatient.asyncGetResult(&Ppatient, &Tpatient))
 		{
-			MEM_PPatient->PushData(Ppatient);
-			PressureLoop.SetPressure(PRESSURE_PATIENT, Ppatient);
-			dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - PPatient: " + String(Ppatient));
-			if (callback_ppatient)
-				callback_ppatient();
+			if (fabs(Pventuri) < 150)
+			{
+				MEM_PPatient->PushData(Ppatient);
+				PressureLoop.SetPressure(PRESSURE_PATIENT, Ppatient);
+				dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - PPatient: " + String(Ppatient));
+				if (callback_ppatient)
+					callback_ppatient();
+			}
 		}
 		else if (drv_PVenturi.asyncGetResult(&Pventuri, &Tventuri))
 		{
-			FlowVenturi = drv_FlowVenturi.GetFlow(Pventuri, Tventuri);
-			MEM_FlowVenturi->PushData(FlowVenturi);
-			MEM_PVenturi->PushData(Pventuri);
-			dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - PVenturi: " + String(Pventuri) + " - FlowVenturi: " + String(FlowVenturi));
-			if (callback_venturi)
-				callback_venturi();
+			if (fabs(Pventuri) < 5)
+			{
+				FlowVenturi = drv_FlowVenturi.GetFlow(Pventuri, Tventuri);
+				MEM_FlowVenturi->PushData(FlowVenturi);
+				MEM_PVenturi->PushData(Pventuri);
+				dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - PVenturi: " + String(Pventuri) + " - FlowVenturi: " + String(FlowVenturi));
+				if (callback_venturi)
+					callback_venturi();
+			}
 		}
 		else if (drv_ADC0.asyncGetResult(&ADC_LastResult))
 		{

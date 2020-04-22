@@ -197,7 +197,12 @@ bool ConfigManagerClass::SetParameter(String p, String v)
 
     if (strPatam == "alarm_snooze") {
         int numberValue = v.toInt();
-        Alarms->ResetAlarm();
+        if (numberValue == 29)
+        {
+            Alarms->SetAlarmGUI(false);
+        }
+        else
+            Alarms->ResetAlarm();
         bres = true;
     }
 
@@ -390,8 +395,8 @@ String ConfigManagerClass::GetParameter(String p)
             + "," + String(sys_s->batteryPowered ? 1 : 0) 
             + "," + String(sys_s->currentBatteryCharge)
             + "," + String(sys_s->currentP_Peak)
-            + "," + String(sys_s->currentTvIsnp)
-            + "," + String(sys_s->currentTvEsp)
+            + "," + String(sys_s->currentTvIsnp*1000.0)
+            + "," + String(sys_s->currentTvEsp * 1000.0)
             + "," + String(sys_s->currentVM);
     }
 

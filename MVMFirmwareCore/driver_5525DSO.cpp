@@ -186,6 +186,7 @@ bool Sensor5525DSO::asyncGetResult(float* P, float* T)
     wbuffer[0] = 0x00;
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
+    hwi->__delay_blocking_ms(2);
     bres = hwi->I2CRead(i2c_device, rbuffer, 3, true);
     if (!bres) return false;
 

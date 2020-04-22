@@ -4,7 +4,7 @@
 
 #include "TidalVolume.h"
 #include <math.h>
-#define VOL_COMP 0.65
+#define VOL_COMP 0.4
 void TidalVolumeClass::Init(HAL* hal)
 {
 	TotalVolume=0;
@@ -25,8 +25,8 @@ void TidalVolumeClass::PushDataSens(float flux_sens)
 
 	if (Status==1)
 	{ 
-		TotalVolume += flux_sens* dT;
-		InspVolumeSensirion += flux_sens* dT;
+		TotalVolume += flux_sens* dT / 60.0;
+		InspVolumeSensirion += flux_sens* dT/60.0;
 		FLUX = flux_sens;
 		FluxMax = flux_sens > FluxMax ? flux_sens : FluxMax;
 		liveFlux = FLUX;
@@ -52,17 +52,17 @@ void TidalVolumeClass::PushDataVenturi(float flux_venturi)
 
 	if (Status == 1)
 	{
-		InspVolumeVenturi += flux_venturi * dT;
+		InspVolumeVenturi += flux_venturi * dT / 60.0;
 	}
 	else
 	{
 		if (Status == 2)
 		{
-			ExpVolumeVenturi += flux_venturi * dT;
+			ExpVolumeVenturi += flux_venturi * dT / 60.0;
 			if (TidalCorrection > 0) {
-				float vf_clamp;
-				vf_clamp = fabs(flux_venturi) > 0.1 ? flux_venturi : 0;
-				TotalVolume += (vf_clamp / TidalCorrection) * dT;
+				float vf_clamp=0;
+				vf_clamp = fabs(flux_venturi) > 0.5 ? flux_venturi : 0;
+				TotalVolume += (vf_clamp / TidalCorrection) * dT / 60.0;
 				FLUX = flux_venturi / TidalCorrection;
 				liveFlux = FLUX;
 				liveVolume = TotalVolume;
