@@ -75,7 +75,9 @@ void MVM_StateMachine::SMExecute()
                         float dt = millis() - last_start;
                         if (dt / 1000.0 > core_config->backup_min_rate)
                         {
-                            backup_trigger = true;
+                            //backup_trigger = true;
+                            core_config->BreathMode = M_BREATH_FORCED;
+                            MVM_Alarms->TriggerAlarm(ALARM_APNEA);
                         }
                     }
                     if ((((-1.0 * sys_c->PPatient_delta2) > core_config->assist_pressure_delta_trigger) && (sys_c->PPatient_delta < 0)) || (backup_trigger == true)) {

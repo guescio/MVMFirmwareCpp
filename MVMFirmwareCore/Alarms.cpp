@@ -366,6 +366,10 @@ void AlarmClass::TriggerAlarm(t_ALARM Alarm)
         ALARM_FLAG = ALARM_FLAG | GenerateFlag(__ERROR_SYSTEM_FALIURE);
         break;
 
+    case ALARM_APNEA:
+        _HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "ALARM @ " + String(millis()) + " ALARM_APNEA");
+        ALARM_FLAG = ALARM_FLAG | GenerateFlag(__ERROR_APNEA);
+        break;
         
     case UNPREDICTABLE_CODE_EXECUTION:
         _HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "ALARM @ " + String(millis()) + " UNPREDICTABLE_CODE_EXECUTION");

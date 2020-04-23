@@ -24,6 +24,7 @@ private:
     void AlarmActions();
     uint32_t GenerateFlag(int alarm_code);
 
+
     uint32_t ALARM_FLAG = 0x0;
     uint32_t ALARM_FLAG_SNOOZE = 0x0;
     uint32_t ALARM_FLAG_FILTERED = 0x0;
