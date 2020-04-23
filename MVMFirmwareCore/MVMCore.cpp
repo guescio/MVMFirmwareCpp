@@ -208,7 +208,7 @@ void MVMCore::NewCycle_Event()
 	sys_s.pres_peak = 0;
 	sys_s.fluxpeak = 0;
 	
-
+	Alarms.TransitionNewCycleEvent();
 }
 void MVMCore::Exhale_Event()
 {
@@ -217,11 +217,14 @@ void MVMCore::Exhale_Event()
 	sys_s.currentVM = sys_s.currentTvIsnp * sys_s.last_bpm;
 	sys_s.currentF_Peak = TidalVolumeExt.currentFluxPeak;
 	sys_s.currentP_Peak = sys_s.pres_peak;
+	Alarms.TransitionInhaleExhale_Event();
 }
 void MVMCore::EndCycle_Event()
 {
 	TidalVolumeExt.DoEndCycle();
 	sys_s.currentTvEsp = TidalVolumeExt.currentTvEsp;
+
+	Alarms.TransitionEndCycleEvent();
 }
 
 
