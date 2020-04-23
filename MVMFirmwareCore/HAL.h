@@ -80,6 +80,9 @@ class HAL
 		float BoardTemperature;
 		uint16_t SupervisorAlarms;
 
+		bool flush_pipe_mode = false;
+		float flush_pipe_open = 0;
+
 	public:
 		DebugIfaceClass dbg;
 		void Init();
@@ -116,6 +119,7 @@ class HAL
 		void TriggerAlarm(t_ALARM alarm_code);
 		float GetGasTemperature();
 		void GetPowerStatus(bool* batteryPowered, float* charge);
+		void FlushPipes(bool run, float valve);
 		uint8_t i2c_scheduler;
 		uint8_t _adc_channel;
 		float ADC_Results[4];

@@ -70,8 +70,12 @@ void MVMCore::Tick()
 	sys_s.pPatient = MVM_HAL.GetPressurePatient(0);
 	sys_s.FlowIn = MVM_HAL.GetFlowInspire(0);
 	sys_s.FlowVenturi = MVM_HAL.GetFlowVenturi(0);
+	
 	MVM_HAL.GetInputValvePID(&sys_s.pid_valvein_slow, &sys_s.pid_valvein_fast);
-	MVM_SM.Tick();
+
+	if (flush_pipe_mode==false)
+		MVM_SM.Tick();
+
 	sys_s.last_O2 = MVM_HAL.GetOxygen();
 	MVM_HAL.GetPowerStatus(&sys_s.batteryPowered, &sys_s.currentBatteryCharge);
 
@@ -176,6 +180,7 @@ void MVMCore::FlowVenturi_Event()
 	TidalVolumeExt.PushDataVenturi(vf);
 	sys_s.VenturiFlux = 0.8 * sys_s.VenturiFlux + 0.2 * vf;
 	sys_s.dt_veturi_100ms= MVM_HAL.GetPVenturi(5);
+	sys_s.VenturiP = MVM_HAL.GetPVenturi(0);
 	sys_s.TidalVolume = TidalVolumeExt.liveVolume;
 	sys_s.Flux = TidalVolumeExt.liveFlux;
 }
@@ -260,24 +265,18 @@ void MVMCore::CalibrateOxygenSensor()
 	//TODO
 }
 
-bool MVMCore::FlushPipes(bool run)
+bool MVMCore::FlushPipes(bool run, float valve_percent)
 {
 	if (!CMC.core_config.run)
 	{
-		if (run)
-		{
-			MVM_HAL.SetOutputValve(true);
-			MVM_HAL.SetInputValve(40);
-		}
-		else
-		{
-			MVM_HAL.SetOutputValve(true);
-			MVM_HAL.SetInputValve(0);
-		}
+		MVM_HAL.FlushPipes(run, valve_percent);
+		flush_pipe_mode = run;
 		return true;
 	}
 	else
 	{
+		MVM_HAL.FlushPipes(false, 0);
+		flush_pipe_mode = false;
 		return false;
 	}
 

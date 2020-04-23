@@ -264,6 +264,14 @@ bool ConfigManagerClass::SetParameter(String p, String v)
         bres = true;
     }
 
+    if (strPatam == "flush_pipe") {
+        float numberValue = v.toFloat();
+        bool enable = numberValue < 1 ? false:true;
+        ((MVMCore*)core)->FlushPipes(enable, numberValue);
+        bres = true;
+    }
+    
+
     if (callback_AfterConfigurationSet)
     {
         callback_AfterConfigurationSet();
@@ -465,6 +473,9 @@ String ConfigManagerClass::GetParameter(String p)
         }*/
     }
 
+    if (strPatam == "get_fp") {
+        return  "valore=" + String(sys_s->FlowIn) + "," + String(sys_s->VenturiP);
+    }
 
     return "valore=ERROR:Invalid Command Argument";
 }

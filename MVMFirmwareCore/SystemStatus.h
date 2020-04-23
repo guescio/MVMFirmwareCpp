@@ -67,6 +67,7 @@ typedef struct
     float currentVM = 0;
     float TidalVolume = 0;
     float VenturiFlux = 0;
+    float VenturiP = 0;
     float Flux = 0;
 
 

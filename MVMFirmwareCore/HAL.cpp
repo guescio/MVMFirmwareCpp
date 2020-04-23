@@ -72,6 +72,7 @@ void HAL::Init()
 	BoardTemperature = 0;
 	SupervisorAlarms=0;
 	i2c_scheduler = 0;
+	flush_pipe_mode = false;
 
 	//hwi->addHandler(std::bind(&HAL::Callback, this, 1));
 }
@@ -85,9 +86,18 @@ void HAL::Tick()
 {
 	uint32_t ADC_LastResult;
 
+	if (flush_pipe_mode == false)
+	{
+		PressureLoop.Tick();
+		hwi.PWMSet(PWM_PV1, PressureLoop.GetValveControl());
+	}
+	else
+	{
+		hwi.PWMSet(PWM_PV1, flush_pipe_open);
+		SetOutputValve(true);
+	}
 
-	PressureLoop.Tick();
-	hwi.PWMSet(PWM_PV1,PressureLoop.GetValveControl());
+	
 	
 	if (hwi.Get_dT_millis(cycle_LT) >= 3)
 	{
@@ -122,7 +132,7 @@ void HAL::Tick()
 				FlowVenturi = drv_FlowVenturi.GetFlow(Pventuri, Tventuri);
 				MEM_FlowVenturi->PushData(FlowVenturi);
 				MEM_PVenturi->PushData(Pventuri);
-				dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - PVenturi: " + String(Pventuri) + " - FlowVenturi: " + String(FlowVenturi));
+				dbg.DbgPrint(DBG_CODE, DBG_INFO, String((int32_t)hwi.GetMillis()) + " - PVenturi: " + String(Pventuri) + " - FlowVenturi: " + String(FlowVenturi));
 				if (callback_venturi)
 					callback_venturi();
 			}
@@ -189,6 +199,7 @@ void HAL::Tick()
 			case 2:
 				if (hwi.Get_dT_millis(cycle_PVenturi_LT) > SCHEDULER_TIMER_PVENTURI)
 				{
+
 					cycle_PVenturi_LT = hwi.GetMillis();
 					if (!drv_PVenturi.asyncMeasure())
 						TriggerAlarm(UNABLE_TO_READ_SENSOR_VENTURI);
@@ -212,6 +223,7 @@ void HAL::Tick()
 					Pin = hwi.GetPIN();
 					BoardTemperature = hwi.GetBoardTemperature();
 					SupervisorAlarms = hwi.GetSupervisorAlarms();
+
 
 					//Check supervisors alarms
 					if (SupervisorAlarms != 0)
@@ -454,8 +466,8 @@ void HAL::CalibrateOxygenSensorInPureOxygen()
 
 void HAL::TriggerAlarm(t_ALARM alarm_code)
 {
-//	if (callback_alarm)
-//		callback_alarm(alarm_code);
+	if (callback_alarm)
+		callback_alarm(alarm_code);
 }
 
 float HAL::GetGasTemperature()
@@ -466,6 +478,12 @@ float HAL::GetGasTemperature()
 void HAL::GetPowerStatus(bool* batteryPowered, float* charge)
 {
 	hwi.GetPowerStatus(batteryPowered, charge);
+}
+
+void HAL::FlushPipes(bool run, float valve)
+{
+	flush_pipe_mode = run;
+	flush_pipe_open = valve;
 }
 
 

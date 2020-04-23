@@ -27,7 +27,7 @@ public:
 	bool SetParameter(String p, String v);
 	String GetParameter(String p);
 	void ZeroSensors(float *sensors, int *count);
-	bool FlushPipes(bool run);
+	bool FlushPipes(bool run, float valve_percent);
 	void CalibrateOxygenSensor();
 	
 private:
@@ -48,6 +48,8 @@ private:
 	uint64_t last_debug_console_log;
 	uint64_t last_alarm_CT;
 	bool alarm_enable;
+
+	bool flush_pipe_mode = false;
 
 	void PPatient_Event();
 	void FlowIn_Event();
