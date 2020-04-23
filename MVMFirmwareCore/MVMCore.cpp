@@ -178,7 +178,7 @@ void MVMCore::FlowVenturi_Event()
 	float vf;
 	vf = MVM_HAL.GetFlowVenturi(0);
 	TidalVolumeExt.PushDataVenturi(vf);
-	sys_s.VenturiFlux = 0.8 * sys_s.VenturiFlux + 0.2 * vf;
+	sys_s.VenturiFlux = vf;
 	sys_s.dt_veturi_100ms= MVM_HAL.GetPVenturi(5);
 	sys_s.VenturiP = MVM_HAL.GetPVenturi(0);
 	sys_s.TidalVolume = TidalVolumeExt.liveVolume;
@@ -283,6 +283,10 @@ bool MVMCore::FlushPipes(bool run, float valve_percent)
 	//TODO
 }
 
+void MVMCore::DOVenturiMeterScan()
+{
+	MVM_HAL.DOVenturiMeterScan();
+}
 
 
 void MVMCore::MVMDebugPrintLogger()
@@ -295,7 +299,7 @@ void MVMCore::MVMDebugPrintLogger()
 	OutputValveSetPoint = MVM_HAL.GetOutputValve() * 100;
 
 	String ts = CMC.core_config.__ADDTimeStamp ? String((uint32_t)MVM_HAL.GetMillis()) + "," : "";
-
+	/*
 	MVM_HAL.WriteUART0(ts+ 
 		String(sys_s.FlowIn) + "," +
 		String(sys_s.pLoop) + "," +
@@ -308,6 +312,14 @@ void MVMCore::MVMDebugPrintLogger()
 		String(sys_s.TidalVolume) + "," +
 		String(sys_s.PPatient_delta2 * 10)
 		);
+	*/
+
+	MVM_HAL.WriteUART0(
+		String(sys_s.pLoop) + "," +
+		String(sys_s.pPatient) + "," +
+		String(pid_fast) + "," +
+		String(pid_slow) 
+	);
 	
 }
 

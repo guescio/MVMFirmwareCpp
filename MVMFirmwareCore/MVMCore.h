@@ -29,7 +29,7 @@ public:
 	void ZeroSensors(float *sensors, int *count);
 	bool FlushPipes(bool run, float valve_percent);
 	void CalibrateOxygenSensor();
-	
+	void DOVenturiMeterScan();
 private:
 	
 	HAL MVM_HAL;

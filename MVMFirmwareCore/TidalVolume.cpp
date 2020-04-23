@@ -62,8 +62,8 @@ void TidalVolumeClass::PushDataVenturi(float flux_venturi)
 			if (TidalCorrection > 0) {
 				float vf_clamp=0;
 				vf_clamp = fabs(flux_venturi) > 0.5 ? flux_venturi : 0;
-				TotalVolume += (vf_clamp / TidalCorrection) * dT / 60.0;
-				FLUX = flux_venturi / TidalCorrection;
+				TotalVolume += (vf_clamp *  TidalCorrection) * dT / 60.0;
+				FLUX = flux_venturi  * TidalCorrection;
 				liveFlux = FLUX;
 				liveVolume = TotalVolume;
 			}
@@ -92,17 +92,18 @@ void TidalVolumeClass::DoExhale()
 {
 	currentTvIsnp = InspVolumeSensirion;
 	currentFluxPeak = FluxMax;
+	
 	if (InspVolumeSensirion > 0)
 		TidalCorrection = InspVolumeVenturi / InspVolumeSensirion;
 	else
 		TidalCorrection = 1;
-
+	//Serial.println("SENS: " + String(InspVolumeVenturi) + " VENT: " + String(InspVolumeSensirion) + " COR: " + String(TidalCorrection));
 	Status = 2;
 }
 void TidalVolumeClass::DoEndCycle()
 {
 	if (TidalCorrection > 0) {
-		currentTvEsp = -1.0 * ExpVolumeVenturi / TidalCorrection;
+		currentTvEsp = -1.0 * ExpVolumeVenturi * TidalCorrection;
 	}
 	Status = 0;
 }

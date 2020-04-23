@@ -15,14 +15,14 @@ void PressureLoopClass::Init(float fast_ms, int32_t LoopRatio, void* handle)
     _fast_ms = fast_ms;
     _LoopRatio = LoopRatio;
     LoopCounter = 0;
-    _PID_P = 70;
-    _PID_I = 500;
+    _PID_P = 25;
+    _PID_I = 400;
     _PID_D = 0;
-    _PID_P2 = 1.2;
+    _PID_P2 = 1.3;
     _PID_I2 = 12;
     _PID_D2 = 0;
     _pid_limit = 0.55;
-    _filter_fast = 0.9;
+    _filter_fast = 0.9;// 0.9;
     _filter_slow = 0.7;
     _ValvePWM = 0;
 
@@ -64,7 +64,7 @@ void PressureLoopClass::PID_SLOW_LOOP()
         Pset2 = (Pset2 * _filter_slow) + ((1- _filter_slow) * _Pset);
 
         pid_error = Pset2 - Pmeas;
-        pid_integral += pid_error* dT;
+        pid_integral += pid_error;
        
         if (pid_integral < 0)
             pid_integral = 0;
@@ -117,10 +117,10 @@ void PressureLoopClass::PID_FAST_LOOP()
     }
     else {
         Pset2 = (Pset2 * _filter_fast) + ((1- _filter_fast) * fast_pid_set);
-
+        //Pset2 = fast_pid_set;
 
         pid_error = Pset2 - Pmeas;
-        pid_integral += pid_error* dT;
+        pid_integral += pid_error;
         if ((pid_integral * PID_I) > 4095.0)
             pid_integral = (4095.0 / PID_I);
         if ((pid_integral * PID_I) < -4095.0)
@@ -132,7 +132,7 @@ void PressureLoopClass::PID_FAST_LOOP()
         pid_outb = pid_out;
         if (pid_outb < 0)
             pid_outb = 0;
-
+        pid_outb = pid_outb + 500;
         if (pid_outb > 4095.0)
             pid_outb = 4095.0;
 

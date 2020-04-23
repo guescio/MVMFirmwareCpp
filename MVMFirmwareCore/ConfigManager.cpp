@@ -29,11 +29,11 @@ void ConfigManagerClass::Init(void* _core, t_SystemStatus* _sys_s, AlarmClass *_
     core_config.exhale_ms = 60000.0 / core_config.respiratory_rate * (core_config.respiratory_ratio);
 
     core_config.P = 70;
-    core_config.I = 300;
+    core_config.I = 5;
     core_config.D = 0;
 
-    core_config.P2 = 1.2;
-    core_config.I2 = 0.4;
+    core_config.P2 = 1.0;
+    core_config.I2 = 0.1;
     core_config.D2 = 0;
 
     core_config.pid_limit = 0.95;
@@ -245,7 +245,7 @@ bool ConfigManagerClass::SetParameter(String p, String v)
         bres = true;
     }
 
-    if (strPatam == "backup_min_rate") {
+    if (strPatam == "backup_min_time") {
         float numberValue = v.toFloat();
         numberValue = numberValue < 1 ? 1 : numberValue;
         core_config.backup_min_rate = numberValue;
@@ -254,13 +254,6 @@ bool ConfigManagerClass::SetParameter(String p, String v)
 
     if (strPatam == "stats_clear") {
         //ResetStatsBegin();
-        bres = true;
-    }
-
-    if (strPatam == "backup_min_rate") {
-        float numberValue = v.toFloat();
-        numberValue = numberValue < 1 ? 1 : numberValue;
-        core_config.backup_min_rate = numberValue;
         bres = true;
     }
 
@@ -475,6 +468,11 @@ String ConfigManagerClass::GetParameter(String p)
 
     if (strPatam == "get_fp") {
         return  "valore=" + String(sys_s->FlowIn) + "," + String(sys_s->VenturiP);
+    }
+
+    if (strPatam == "venturi_scan") {
+        ((MVMCore*)core)->DOVenturiMeterScan();
+        return  "valore=OK";
     }
 
     return "valore=ERROR:Invalid Command Argument";

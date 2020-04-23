@@ -49,7 +49,7 @@ void MVM_StateMachine::SMExecute()
 
                 //ResetStats();
                 
-                last_start = millis();
+                last_start = MVM_HAL->GetMillis();
               
                 MVM_HAL->SetOutputValve(false);
                 MVM_HAL->SetInputValve(core_config->target_pressure_auto);
@@ -72,7 +72,7 @@ void MVM_StateMachine::SMExecute()
 
                     if (core_config->backup_enable)
                     {
-                        float dt = millis() - last_start;
+                        float dt = MVM_HAL->Get_dT_millis( last_start);
                         if (dt / 1000.0 > core_config->backup_min_rate)
                         {
                             //backup_trigger = true;
@@ -90,7 +90,7 @@ void MVM_StateMachine::SMExecute()
                         //StatEndCycle();
                         //ResetStats();
 
-                        last_start = millis();
+                        last_start = MVM_HAL->GetMillis();
                         
                         MVM_HAL->SetInputValve(core_config->target_pressure_assist);
                         MVM_HAL->SetOutputValve(false);
@@ -108,6 +108,7 @@ void MVM_StateMachine::SMExecute()
         }
         else {
             //WE ARE NOT RUNNING
+            last_start = MVM_HAL->GetMillis();
             MVM_HAL->SetInputValve(0);
             MVM_HAL->SetOutputValve(true);
         }

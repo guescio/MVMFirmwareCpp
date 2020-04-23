@@ -28,9 +28,9 @@ void HAL::Init()
 	drv_PLoop.Init(IIC_PS_0, PLOOP_MODEL, OVS_1024, &_dc);
 	drv_PPatient.Init(IIC_PS_1, PPATIENT_MODEL, OVS_1024, &_dc);
 	drv_PVenturi.Init(IIC_PS_2, PVENTURI, OVS_1024, &_dc);
-	drv_FlowVenturi.Init(SpiroquantH_R122P04);
+	drv_FlowVenturi.Init(ALPE_1551);
 
-	PressureLoop.Init(5, 5, &_dc);
+	PressureLoop.Init(5, 2, &_dc);
 	drv_ADC0.Init(IIC_ADC_0, &_dc);
 	drv_OxygenSensor.Init(OxygenSensorA, &_dc);
 	drv_ADC0.setGain(GAIN_ONE);
@@ -127,12 +127,12 @@ void HAL::Tick()
 		}
 		else if (drv_PVenturi.asyncGetResult(&Pventuri, &Tventuri))
 		{
-			if (fabs(Pventuri) < 5)
+			if (fabs(Pventuri) < 10)
 			{
 				FlowVenturi = drv_FlowVenturi.GetFlow(Pventuri, Tventuri);
 				MEM_FlowVenturi->PushData(FlowVenturi);
 				MEM_PVenturi->PushData(Pventuri);
-				dbg.DbgPrint(DBG_CODE, DBG_INFO, String((int32_t)hwi.GetMillis()) + " - PVenturi: " + String(Pventuri) + " - FlowVenturi: " + String(FlowVenturi));
+				dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - PVenturi: " + String(Pventuri) + " - FlowVenturi: " + String(FlowVenturi));
 				if (callback_venturi)
 					callback_venturi();
 			}
@@ -485,6 +485,41 @@ void HAL::FlushPipes(bool run, float valve)
 	flush_pipe_mode = run;
 	flush_pipe_open = valve;
 }
+
+
+void HAL::DOVenturiMeterScan()
+{
+	float fref, tref;
+	float pmeas, tmeas;
+	float fref_m, pmeas_m, cnt;
+	if (flush_pipe_mode)
+	{
+		SetOutputValve(true);
+		for (int i = 30;i < 100;i++)
+		{
+			hwi.PWMSet(PWM_PV1, i);
+			hwi.__delay_blocking_ms(500);
+			fref_m = 0;
+			pmeas_m = 0;
+			for (int j = 0;j < 30;j++)
+			{
+				drv_FlowIn.doMeasure(&fref, &tref);
+				drv_PVenturi.doMeasure(&pmeas, &tmeas);
+				fref_m += fref;
+				pmeas_m += pmeas;
+			}
+			
+			fref_m = fref_m / 30;
+			pmeas_m = pmeas_m / 30;
+
+			hwi.WriteUART0(String(i) + "," + String(fref_m,5) + "," + String(pmeas_m,5));
+		}
+		
+		
+	}
+}
+
+
 
 
 //                  #     # ### 

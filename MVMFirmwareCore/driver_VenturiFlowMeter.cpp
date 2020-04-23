@@ -21,11 +21,40 @@ float VenturiFlowMeter::GetFlow(float pressure, float temperature)
 		VenturiFlux = (_LowPass * VenturiFlux) + ((1 - _LowPass) * vf);
 		return VenturiFlux;
 	}
+
+	if (_model == ALPE_1551)
+	{
+		float vf = ALPE_1551_Convert(pressure);
+		VenturiFlux = (_LowPass * VenturiFlux) + ((1 - _LowPass) * vf);
+		return VenturiFlux;
+	}
 }
 float VenturiFlowMeter::SpiroquantH_R122P04_Convert(float pressure)
 {
 	float dp = pressure;
+	float sign = 1;
+	if (dp < 0) {
+		sign = -1;
+		dp = dp * -1;
+	};
 	float vf= 0.1513 * (dp * dp * dp) - 3.3424 * (dp * dp) + 41.657 * dp;
+	vf = vf * sign;
+	Integral += vf;
+	return vf;
+}
+float VenturiFlowMeter::ALPE_1551_Convert(float pressure)
+{
+	float dp = pressure;
+	float sign = 1;
+	if (dp < 0) {
+		sign = -1;
+		dp = dp * -1;
+	};
+	float vf = -0.0647130 * (dp * dp * dp * dp) + 1.4481369 * (dp * dp * dp)
+		- 11.2548243 * (dp * dp) + 43.6025093 * dp;
+	vf = vf * sign;
+
+
 	Integral += vf;
 	return vf;
 }

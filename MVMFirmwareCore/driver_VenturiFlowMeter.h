@@ -2,7 +2,7 @@
 
 #ifndef _DRIVER_VENTURISPIROQUANTH _h
 #define _DRIVER_VENTURISPIROQUANTH _h
-typedef enum { SpiroquantH_R122P04} t_VenturiSensorModel;
+typedef enum { SpiroquantH_R122P04, ALPE_1551} t_VenturiSensorModel;
 
 class VenturiFlowMeter
 {
@@ -16,6 +16,7 @@ public:
 
 private:
 	float SpiroquantH_R122P04_Convert(float pressure);
+	float ALPE_1551_Convert(float pressure);
 	float VenturiFlux=0;
 	float _LowPass;
 	float Integral=0;
