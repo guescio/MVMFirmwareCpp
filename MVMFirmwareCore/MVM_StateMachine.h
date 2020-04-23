@@ -57,7 +57,8 @@ public:
 private:
 	void SMExecute();
 	float timer1;
-	int32_t dT;
+	int32_t ddT;
+	float dT;
 	uint64_t cycle_SMTick;
 	HAL* MVM_HAL;
 	t_config* core_config;

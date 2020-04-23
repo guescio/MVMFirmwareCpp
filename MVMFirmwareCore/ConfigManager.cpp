@@ -231,6 +231,18 @@ bool ConfigManagerClass::SetParameter(String p, String v)
         bres = true;
     }
 
+    if (strPatam == "pcv_trigger_enable") {
+        int numberValue = v.toInt();
+        core_config.pcv_trigger_enable = numberValue ? true : false;
+        Serial.println("valore=OK");
+    }
+    if (strPatam == "pcv_trigger") {
+        float numberValue = v.toFloat();
+        core_config.pcv_trigger = numberValue;
+        Serial.println("valore=OK");
+    }
+
+
     if (strPatam == "wdenable") {
         int numberValue = v.toInt();
         core_config.__WDENABLE = numberValue != 0 ? true : false;

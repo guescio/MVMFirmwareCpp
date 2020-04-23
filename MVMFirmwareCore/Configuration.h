@@ -47,8 +47,8 @@ typedef struct
     bool __ADDTimeStamp = false;
     bool __WDENABLE=false;
 
-    bool pcv_trigger_enable;
-    float pcv_trigger;
+    bool pcv_trigger_enable=true;
+    float pcv_trigger=4;
 
     float pause_timeout;
     

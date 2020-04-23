@@ -15,12 +15,13 @@ void MVM_StateMachine::Init(HAL* _MVM_HAL, AlarmClass *_MVM_Alarms, t_config* _c
     timer1 = 0;
     mvm_sm = FR_OPEN_INVALVE;
     
-    dT = _dT;
+    ddT = _dT;
 }
 void MVM_StateMachine::Tick()
 {
-	if (MVM_HAL->Get_dT_millis(cycle_SMTick)> dT)
+	if (MVM_HAL->Get_dT_millis(cycle_SMTick)> ddT)
 	{
+        dT = MVM_HAL->Get_dT_millis(cycle_SMTick);
         cycle_SMTick = MVM_HAL->GetMillis();
 		SMExecute();
 	}
@@ -28,11 +29,12 @@ void MVM_StateMachine::Tick()
 
 void MVM_StateMachine::SMExecute()
 {
+
     
 
 
     
-    timer1++;
+    timer1+=dT;
     
 
     switch (mvm_sm) {
@@ -54,7 +56,7 @@ void MVM_StateMachine::SMExecute()
                 MVM_HAL->SetOutputValve(false);
                 MVM_HAL->SetInputValve(core_config->target_pressure_auto);
 
-                timer1 = 1;
+                timer1 = dT;
                 mvm_sm = FR_WAIT_INHALE_TIME;
                 MVM_HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "SM: Start automatic cycle");
             }
@@ -94,7 +96,7 @@ void MVM_StateMachine::SMExecute()
                         
                         MVM_HAL->SetInputValve(core_config->target_pressure_assist);
                         MVM_HAL->SetOutputValve(false);
-                        timer1 = 1;
+                        timer1 = dT;
 
                         mvm_sm = AST_WAIT_MIN_INHALE_TIME;
                         MVM_HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "SM: Start assisted cycle");
@@ -116,7 +118,7 @@ void MVM_StateMachine::SMExecute()
 
     case FR_WAIT_INHALE_TIME:
         dbg_state_machine = 1;
-        if (timer1 >= (core_config->inhale_ms / dT)) {
+        if (timer1 >= core_config->inhale_ms ) {
             if ((core_config->pause_inhale == false) && (core_config->pause_lg == false)) {
                 timer1 = 0;
 
@@ -147,7 +149,7 @@ void MVM_StateMachine::SMExecute()
     case FR_WAIT_EXHALE_TIME:
         dbg_state_machine = 2;
 
-        if (timer1 >= (core_config->exhale_ms / dT)) {
+        if (timer1 >= core_config->exhale_ms ) {
             if (core_config->pause_exhale == false) {
                 if (callback_EndCycle)
                     callback_EndCycle();
@@ -162,7 +164,7 @@ void MVM_StateMachine::SMExecute()
         }
         else
         {
-            if (timer1 >= (700 / dT)) {
+            if (timer1 >= 700 ) {
 
                 if (core_config->pcv_trigger_enable)
                 {
@@ -180,9 +182,9 @@ void MVM_StateMachine::SMExecute()
 
     case AST_WAIT_MIN_INHALE_TIME:
         dbg_state_machine = 3;
-        if (timer1 > 300 / dT) {
+        if (timer1 > 300) {
             if ((sys_c->pLoop >= core_config->target_pressure * 0.5) 
-                    || (timer1 > 1000 / dT) ){
+                    || (timer1 > 1000) ){
                 mvm_sm = AST_WAIT_FLUX_DROP;
                 MVM_HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "SM: AST_WAIT_FLUX_DROP");
                 timer1 = 0;
@@ -195,7 +197,7 @@ void MVM_StateMachine::SMExecute()
 
         if ((sys_c->FlowIn  <= (core_config->flux_close * sys_c->fluxpeak) / 100.0)
             || (sys_c->in_over_pressure_emergency == true)
-            || (timer1 > 6000 / dT) ){
+            || (timer1 > 6000 ) ){
             last_isp_time = timer1;
             mvm_sm = AST_WAIT_FLUX_DROP_b;
             MVM_HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "SM: AST_WAIT_FLUX_DROP_b");
@@ -205,7 +207,7 @@ void MVM_StateMachine::SMExecute()
     case AST_WAIT_FLUX_DROP_b:
         dbg_state_machine = 5;
         if ((core_config->pause_inhale == false) && (core_config->pause_lg == false)) {
-            timer1 = 1;
+            timer1 = dT;
             
             //StatPhaseExpire();
             
@@ -233,8 +235,8 @@ void MVM_StateMachine::SMExecute()
         dbg_state_machine = 6;
         float dead_time_s;
         dead_time_s = 0.5 * last_isp_time;
-        dead_time_s = dead_time_s > 400/dT ? dead_time_s : 400 / dT;
-        dead_time_s = dead_time_s > 2000 / dT ? 2000 / dT : dead_time_s;
+        dead_time_s = dead_time_s > 400 ? dead_time_s : 400;
+        dead_time_s = dead_time_s > 2000 ? 2000 : dead_time_s;
         if (timer1 >= dead_time_s) {
             if (core_config->pause_exhale == false) {
                 mvm_sm = FR_OPEN_INVALVE;
