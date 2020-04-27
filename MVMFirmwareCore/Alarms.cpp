@@ -401,6 +401,7 @@ void AlarmClass::ResetAlarm()
 {
     ALARM_FLAG_SNOOZE = ALARM_FLAG ;
     ALARM_FLAG_SNOOZE_millis = _HAL->GetMillis();
+    ALARM_FLAG = 0;
 }
 
 void AlarmClass::TransitionNewCycleEvent()
