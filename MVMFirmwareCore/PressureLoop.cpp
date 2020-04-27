@@ -61,7 +61,7 @@ void PressureLoopClass::PID_SLOW_LOOP()
         pid_outb = 0;
     }
     else {
-        Pset2 = (Pset2 * _filter_slow) + ((1- _filter_slow) * _Pset);
+        Pset2 = (Pset2 * _filter_slow) + ((1- _filter_slow) * (_Pset/1.3333));
 
         pid_error = Pset2 - Pmeas;
         pid_integral += pid_error;
