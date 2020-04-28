@@ -43,12 +43,12 @@ bool OxygenSensor::setData(float adc_oxygen, float temprature)
 }
 void OxygenSensor::CalibrateAir()
 {
-	calib_m = -(_adc_oxygen - 21);
+	calib_m = -((_adc_oxygen*calib_q) - 21);
 	calib_second_counter = 0;
 }
 void OxygenSensor::CalibratePureOxygen()
 {
-	calib_m = -(_adc_oxygen - 100);
+	calib_m = -((_adc_oxygen*calib_q) - 100);
 	calib_second_counter = 0;
 }
 
