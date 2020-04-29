@@ -28,7 +28,7 @@ class PressureLoopClass
     void SetPidFilter(float fast, float slow);
     void GetPidFilter(float *fast, float *slow);
     void GetPidMonitor(float* slow, float* fast);
-
+    
 private:
     float _PID_P2;
     float _PID_I2;
@@ -64,6 +64,10 @@ private:
 
     uint64_t last_fast_ms;
     uint64_t last_slow_ms;
+
+    float ValveLUT(float pid_value);
+    float pid_fast_last = 0;
+
 };
 
 

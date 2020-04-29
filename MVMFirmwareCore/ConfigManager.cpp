@@ -28,9 +28,14 @@ void ConfigManagerClass::Init(void* _core, t_SystemStatus* _sys_s, AlarmClass *_
     core_config.inhale_ms = 60000.0 / core_config.respiratory_rate * (1 - core_config.respiratory_ratio);
     core_config.exhale_ms = 60000.0 / core_config.respiratory_rate * (core_config.respiratory_ratio);
 
-    core_config.P = 30;
+    core_config.P = 70;
     core_config.I = 3;
     core_config.D = 0;
+
+    core_config.I_rhard = 3;
+    core_config.I_rlow= 15;
+    core_config.P_rhard = 30;
+    core_config.P_rlow = 70;
 
     core_config.P2 = 2.0;
     core_config.I2 = 0.2;
@@ -275,11 +280,25 @@ bool ConfigManagerClass::SetParameter(String p, String v)
         ((MVMCore*)core)->FlushPipes(enable, numberValue);
         bres = true;
     }
+
+    if (strPatam == "leak_compensation") {
+        float numberValue = v.toFloat();
+        core_config.leak_compensation = numberValue;
+        bres = true;
+    }
     
 
     if (callback_AfterConfigurationSet)
     {
         callback_AfterConfigurationSet();
+    }
+
+
+    if (strPatam == "epc") {
+        float numberValue = v.toFloat();
+        bool enable = numberValue < 1 ? false : true;
+        core_config.enable_pressure_compensation = enable;
+        bres = true;
     }
 
     return bres;
@@ -397,6 +416,12 @@ String ConfigManagerClass::GetParameter(String p)
     if (strPatam == "pause_lg_p") {
         return  "valore=" + String(core_config.pause_lg_p);
     }
+
+
+    if (strPatam == "leak_compensation") {
+        return  "valore=" + String(core_config.leak_compensation);
+    }
+    
     if (strPatam == "all") {
         return "valore=" + String(sys_s->pPatient) 
             + "," + String(sys_s->Flux)
@@ -486,6 +511,12 @@ String ConfigManagerClass::GetParameter(String p)
         ((MVMCore*)core)->DOVenturiMeterScan();
         return  "valore=OK";
     }
+
+    if (strPatam == "valve_scan") {
+        ((MVMCore*)core)->DOValveScan();
+        return  "valore=OK";
+    }
+    
 
     return "valore=ERROR:Invalid Command Argument";
 }

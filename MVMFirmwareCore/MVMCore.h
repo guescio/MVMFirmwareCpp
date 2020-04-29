@@ -30,6 +30,7 @@ public:
 	bool FlushPipes(bool run, float valve_percent);
 	void CalibrateOxygenSensor();
 	void DOVenturiMeterScan();
+	void DOValveScan();
 private:
 	
 	HAL MVM_HAL;

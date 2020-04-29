@@ -136,9 +136,10 @@ void MVMCore::PLoop_Event()
 void MVMCore::PPatient_Event()
 {
 	float v = MVM_HAL.GetPressurePatient(0);
+	sys_s.pres_peak = sys_s.pres_peak > v ? sys_s.pres_peak : v;
 	sys_s.pPatient_low_passed = 0.90 * sys_s.pPatient_low_passed + v * 0.1;
-	sys_s.pres_peak = sys_s.pPatient_low_passed > sys_s.pres_peak ?
-							sys_s.pPatient_low_passed : sys_s.pres_peak;
+	sys_s.pres_peak_lp = sys_s.pPatient_low_passed > sys_s.pres_peak_lp ?
+							sys_s.pPatient_low_passed : sys_s.pres_peak_lp;
 	MEM_Ppatient_LP->PushData(sys_s.pPatient_low_passed);
 
 	sys_s.PPatient_delta = v - MEM_Ppatient_LP->GetData(5);
@@ -205,6 +206,7 @@ void MVMCore::NewCycle_Event()
 	sys_s.averaged_bpm = 0.8 * sys_s.averaged_bpm + 0.2 * sys_s.last_bpm;
 
 	sys_s.last_peep = averaged_PPatient;
+	sys_s.pres_peak_lp = 0;
 	sys_s.pres_peak = 0;
 	sys_s.fluxpeak = 0;
 	
@@ -216,7 +218,7 @@ void MVMCore::Exhale_Event()
 	sys_s.currentTvIsnp = TidalVolumeExt.currentTvIsnp;
 	sys_s.currentVM = sys_s.currentTvIsnp * sys_s.last_bpm;
 	sys_s.currentF_Peak = TidalVolumeExt.currentFluxPeak;
-	sys_s.currentP_Peak = sys_s.pres_peak;
+	sys_s.currentP_Peak = sys_s.pres_peak_lp;
 	Alarms.TransitionInhaleExhale_Event();
 }
 void MVMCore::EndCycle_Event()
@@ -289,6 +291,12 @@ bool MVMCore::FlushPipes(bool run, float valve_percent)
 void MVMCore::DOVenturiMeterScan()
 {
 	MVM_HAL.DOVenturiMeterScan();
+}
+
+
+void MVMCore::DOValveScan()
+{
+	MVM_HAL.DOValveScan();
 }
 
 

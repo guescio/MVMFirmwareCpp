@@ -79,11 +79,13 @@ typedef struct
     float dgb_peaktime = 0;
     float fluxpeak = 0;
     float pres_peak = 0;
+    float pres_peak_lp = 0;
     
     float dt_veturi_100ms = 0;
 
     float pid_valvein_slow = 0;
     float pid_valvein_fast = 0;
+    float pressure_compensation_coeff=0;
 
     t_stat_param __stat_param;
 

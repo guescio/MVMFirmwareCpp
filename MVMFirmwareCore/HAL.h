@@ -121,6 +121,7 @@ class HAL
 		void GetPowerStatus(bool* batteryPowered, float* charge);
 		void FlushPipes(bool run, float valve);
 		void DOVenturiMeterScan();
+		void DOValveScan();
 		uint8_t i2c_scheduler;
 		uint8_t _adc_channel;
 		float ADC_Results[4];

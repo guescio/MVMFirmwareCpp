@@ -520,6 +520,54 @@ void HAL::DOVenturiMeterScan()
 }
 
 
+void HAL::DOValveScan()
+{
+	float fref, tref;
+	float pmeas, tmeas;
+	float fref_m, pmeas_m, cnt;
+	if (flush_pipe_mode)
+	{
+		SetOutputValve(true);
+		for (int i = 0;i < 100;i++)
+		{
+			hwi.PWMSet(PWM_PV1, i);
+			hwi.__delay_blocking_ms(250);
+			fref_m = 0;
+			pmeas_m = 0;
+			for (int j = 0;j < 30;j++)
+			{
+				drv_FlowIn.doMeasure(&fref, &tref);
+				fref_m += fref;
+				pmeas_m += pmeas;
+			}
+
+			fref_m = fref_m / 30;
+
+			hwi.WriteUART0(String(i) + "," + String(fref_m, 5));
+		}
+
+		for (int i = 100;i > 0;i--)
+		{
+			hwi.PWMSet(PWM_PV1, i);
+			hwi.__delay_blocking_ms(250);
+			fref_m = 0;
+			pmeas_m = 0;
+			for (int j = 0;j < 30;j++)
+			{
+				drv_FlowIn.doMeasure(&fref, &tref);
+				fref_m += fref;
+				pmeas_m += pmeas;
+			}
+
+			fref_m = fref_m / 30;
+
+			hwi.WriteUART0(String(i) + "," + String(fref_m, 5));
+		}
+
+
+	}
+}
+
 
 
 //                  #     # ### 

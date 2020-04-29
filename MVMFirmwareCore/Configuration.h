@@ -31,6 +31,15 @@ typedef struct
     float I2;
     float D2;
 
+
+    float P_rlow;
+    float I_rlow;
+    
+
+    float P_rhard;
+    float I_rhard;
+
+
     bool pause_inhale;
     bool pause_exhale;
 
@@ -42,6 +51,7 @@ typedef struct
     float pause_lg_timer;
     float pause_lg_p;
     bool pause_lg;
+    bool enable_pressure_compensation;
 
     bool __CONSOLE_MODE = false;
     bool __ADDTimeStamp = false;
@@ -51,6 +61,7 @@ typedef struct
     float pcv_trigger=4;
 
     float pause_timeout;
+    float leak_compensation = 0;
     
 } t_config;
 

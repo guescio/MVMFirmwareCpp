@@ -30,7 +30,7 @@ void MVM_StateMachine::Tick()
 void MVM_StateMachine::SMExecute()
 {
 
-    
+    static int delta_error_counter = 0;
 
 
     
@@ -53,8 +53,60 @@ void MVM_StateMachine::SMExecute()
                 
                 last_start = MVM_HAL->GetMillis();
               
+                //Compensate pressure flat top error changing set point
+                if (core_config->enable_pressure_compensation)
+                {
+                    if ((core_config->target_pressure_auto - sys_c->currentP_Peak) > 0)
+                        sys_c->pressure_compensation_coeff++;
+                    else
+                        if ((core_config->target_pressure_auto - sys_c->currentP_Peak) < 0)
+                           sys_c->pressure_compensation_coeff--;
+
+                    sys_c->pressure_compensation_coeff > 15 ? 15 : sys_c->pressure_compensation_coeff;
+                    sys_c->pressure_compensation_coeff < -15 ? -15 : sys_c->pressure_compensation_coeff;
+                   
+                }
+                else
+                {
+                    sys_c->pressure_compensation_coeff = 0;
+                }
+            
+                //TRY TO AUTOCOMPENSATE
+                /*if (fabs(sys_c->pres_peak - core_config->target_pressure_auto) > 10)
+                {
+                    delta_error_counter++;
+                }
+
+              
+                if (delta_error_counter>3)
+                {
+                    if (core_config->I == core_config->I_rhard)
+                    {
+                        core_config->I = core_config->I_rlow;
+                        core_config->P = core_config->P_rlow;
+                    }
+                    else
+                    {
+                        core_config->I = core_config->I_rhard;
+                        core_config->P = core_config->P_rhard;
+                    }
+
+                    delta_error_counter = 0;
+
+                    MVM_HAL->ConfigureInputValvePID(core_config->P,
+                        core_config->I,
+                        core_config->D,
+                        core_config->P2,
+                        core_config->I2,
+                        core_config->D2,
+                        core_config->pid_limit
+                    );
+                }*/
+              
+
+                sys_c->__stat_param.t90a = 0;
                 MVM_HAL->SetOutputValve(false);
-                MVM_HAL->SetInputValve(core_config->target_pressure_auto);
+                MVM_HAL->SetInputValve(core_config->target_pressure_auto  + sys_c->pressure_compensation_coeff);
 
                 timer1 = dT;
                 mvm_sm = FR_WAIT_INHALE_TIME;
@@ -113,11 +165,13 @@ void MVM_StateMachine::SMExecute()
             last_start = MVM_HAL->GetMillis();
             MVM_HAL->SetInputValve(0);
             MVM_HAL->SetOutputValve(true);
+            sys_c->pressure_compensation_coeff = 0;
         }
         break;
 
     case FR_WAIT_INHALE_TIME:
         dbg_state_machine = 1;
+
         if (timer1 >= core_config->inhale_ms ) {
             if ((core_config->pause_inhale == false) && (core_config->pause_lg == false)) {
                 timer1 = 0;
@@ -127,7 +181,7 @@ void MVM_StateMachine::SMExecute()
 
                 //StatPhaseExpire();
 
-                MVM_HAL->SetInputValve(0);
+                MVM_HAL->SetInputValve(core_config->leak_compensation);
                 MVM_HAL->SetOutputValve(true);
 
                 mvm_sm = FR_WAIT_EXHALE_TIME;
@@ -214,7 +268,7 @@ void MVM_StateMachine::SMExecute()
             if (callback_Exhale)
                 callback_Exhale();
 
-            MVM_HAL->SetInputValve(0);
+            MVM_HAL->SetInputValve(core_config->leak_compensation);
             MVM_HAL->SetOutputValve(true);
             mvm_sm = AST_DEADTIME;
             MVM_HAL->dbg.DbgPrint(DBG_CODE, DBG_INFO, "SM: AST_DEADTIME");
