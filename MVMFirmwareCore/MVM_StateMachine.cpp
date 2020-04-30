@@ -1,5 +1,5 @@
 // 
-// 
+// The Class responsible to change the status of the ventilator
 // 
 
 #include "MVM_StateMachine.h"

@@ -18,7 +18,7 @@ void OxygenSensor::Init(t_OxygenSensorModel model, void* handle)
 		calib_q = 0.00452689;
 		calib_m = -1.63;
 		calib_interval_seconds = 3600 * 24 * 7;		//7 days
-	}
+	}                                               // need else to warn that there are no parameters set.
 	
 	
 	_adc_oxygen=0;

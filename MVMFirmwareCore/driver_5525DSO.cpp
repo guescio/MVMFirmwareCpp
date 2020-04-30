@@ -84,7 +84,8 @@ bool Sensor5525DSO::Init(t_i2cdevices device, t_ps_sensor model, t_ps_resolution
     __last_millis = hwi->GetMillis();
     return true;
 }
-bool Sensor5525DSO::doMeasure(float* P, float* T)
+
+bool Sensor5525DSO::doMeasure(float* P, float* T) // read pressure and temperature from sensor
 {
     bool bres = true;
     uint8_t wbuffer[6];
@@ -94,12 +95,12 @@ bool Sensor5525DSO::doMeasure(float* P, float* T)
 
     if (!_initialized) return false;
     //Read raw pressure
-    wbuffer[0] = GetResolutionByteCodePressure();
+    wbuffer[0] = GetResolutionByteCodePressure();  // D1(Pressure) with certain OVS (resolution) value
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
     hwi->__delay_blocking_ms(GetResolutionDelay()*2);
 
-    wbuffer[0] = 0x00;
+    wbuffer[0] = 0x00;    //ADC Read request
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
 
@@ -111,12 +112,12 @@ bool Sensor5525DSO::doMeasure(float* P, float* T)
     pressure_raw = (rbuffer[0] << 16) + (rbuffer[1] << 8) + rbuffer[2];
 
     //Read raw temperature
-    wbuffer[0] = GetResolutionByteCodeTemp();
+    wbuffer[0] = GetResolutionByteCodeTemp();      // D2(Pressure) with certain OVS (resolution) value
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
     hwi->__delay_blocking_ms(GetResolutionDelay()*2);
 
-    wbuffer[0] = 0x00;
+    wbuffer[0] = 0x00;    //ADC Read request
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
 
@@ -146,10 +147,10 @@ bool Sensor5525DSO::asyncMeasure()
         return false;
 
     if (__TDiv <= 0)
-    {
+    { // once in 51 times??? Because we don't need to read Temperature so much.
         __TDiv = 50;
         wbuffer[0] = GetResolutionByteCodeTemp();
-        bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
+        bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true); // request conversion for Temperature
         if (!bres) return false;
         __last_is_T = true;
     }
@@ -157,7 +158,7 @@ bool Sensor5525DSO::asyncMeasure()
     {
         __TDiv--;
         wbuffer[0] = GetResolutionByteCodePressure();
-        bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
+        bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true); // request conversion for Pressure
         if (!bres) return false;
         __last_is_T = false;
     }
@@ -165,6 +166,7 @@ bool Sensor5525DSO::asyncMeasure()
     __pending_meas = true;
     return true;
 }
+
 bool Sensor5525DSO::asyncGetResult(float* P, float* T)
 {
     bool bres = true;
@@ -178,16 +180,16 @@ bool Sensor5525DSO::asyncGetResult(float* P, float* T)
     if (!__pending_meas)
         return false;
 
-    if (hwi->Get_dT_millis(__last_millis) < GetResolutionDelay())
+    if (hwi->Get_dT_millis(__last_millis) < GetResolutionDelay()) // wait for the conversion done.
         return false;
 
     __pending_meas = false;
 
-    wbuffer[0] = 0x00;
+    wbuffer[0] = 0x00;    //ADC Read request
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
     hwi->__delay_blocking_ms(2);
-    bres = hwi->I2CRead(i2c_device, rbuffer, 3, true);
+    bres = hwi->I2CRead(i2c_device, rbuffer, 3, true); // Read response
     if (!bres) return false;
 
     if (__last_is_T)
@@ -215,6 +217,7 @@ bool Sensor5525DSO::asyncGetResult(float* P, float* T)
     
     return data_valid;
 }
+
 void Sensor5525DSO::CalibrateDate_5525DSO(int32_t raw_temp, int32_t raw_pressure, float* T, float* P)
 {
     float PINSIDE, PINSIDE_ZERO;
@@ -246,16 +249,17 @@ void Sensor5525DSO::CalibrateDate_5525DSO(int32_t raw_temp, int32_t raw_pressure
     Pres = (((raw_pressure * SENS) / (pow(2, 21))) - OFF) / (pow(2, 15));
 
     *T = ((float)Temp) / 100.0;
-    PINSIDE = ((float)Pres) / 10000.0 * 68.9476;
-    PINSIDE_ZERO = PINSIDE - sensorCT.ZERO;
+    PINSIDE = ((float)Pres) / 10000.0 * 68.9476; // conversion from psi to mbar
+    PINSIDE_ZERO = PINSIDE - sensorCT.ZERO; // relative to atmosphere pressure
    //     Serial.println("DBG; " + String(PINSIDE) + " " + String(sensorCT.ZERO) + " " + String(PINSIDE_ZERO));
     *P = PINSIDE_ZERO;
 }
+
 uint8_t Sensor5525DSO::GetResolutionByteCodeTemp()
 {
     switch (sensor_model)
     {
-    case OVS_256:
+    case OVS_256:  //Oversampling Ratio (OSR) or OVS
         return 0x50;
     case OVS_512:
         return 0x52;
@@ -315,7 +319,7 @@ bool Sensor5525DSO::Reset_5525DSO()
     uint8_t wbuffer[6];
 
     //Read raw pressure
-    wbuffer[0] = 0x1E;
+    wbuffer[0] = 0x1E; // reset command
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
 
@@ -344,7 +348,7 @@ float Sensor5525DSO::doZero()
     float value=0;
     float cnt = 0;
     sensorCT.ZERO = 0;
-    doMeasure(&P, &T);
+    doMeasure(&P, &T);       // Why you read before and after the average?
 
     for (int i = 0; i < 50; i++)
     {
@@ -360,8 +364,8 @@ float Sensor5525DSO::doZero()
     {
         value = value / cnt;
     }
-    sensorCT.ZERO = value;
-    doMeasure(&P, &T);
+    sensorCT.ZERO = value;   // set to average value.
+    doMeasure(&P, &T);       // Why you read before and after the average?
     return value;
 }
 

@@ -15,8 +15,8 @@ void MVMCore::Init()
 	CMC.Init(this, &sys_s, &Alarms);
 	CMC.addHandler_AfterConfigurationSet(std::bind(&MVMCore::ConfigurationChanged_Event, this));
 
-	MVM_HAL.SetInputValve(0);
-	MVM_HAL.SetOutputValve(0);
+	MVM_HAL.SetInputValve(0);       // Close PV-1
+	MVM_HAL.SetOutputValve(0);      // Close PV-2
 	MVM_HAL.SetAlarmLed(false);
 	MVM_HAL.SetAlarmRele(false);
 	MVM_HAL.SetBuzzer(false);
@@ -29,7 +29,7 @@ void MVMCore::Init()
 	MVM_SM.addHandler_Exhale(std::bind(&MVMCore::Exhale_Event, this));
 	MVM_SM.addHandler_EndCycle(std::bind(&MVMCore::EndCycle_Event, this));
 
-	MEM_Ppatient_LP = new CircularBuffer(10);
+	MEM_Ppatient_LP = new CircularBuffer(10); // 10 is the buffer size. Only keep 10 measurements???
 	
 	old_delta_ppatient = 0;
 	sys_s.pPatient = 0;
@@ -42,26 +42,27 @@ void MVMCore::Init()
 	
 	Alarms.Init(&MVM_HAL, &sys_s);
 
-	MVM_SM.Init(&MVM_HAL, &Alarms, &CMC.core_config, &sys_s, 10);
+	MVM_SM.Init(&MVM_HAL, &Alarms, &CMC.core_config, &sys_s, 10);  // every 10 ms, it checks phase of respiration.
 
 	averaged_PPatient = 0;
 	
 	MVM_HAL.delay_ms(100);
-	MVM_HAL.SetInputValve(0);
-	MVM_HAL.SetOutputValve(true);
+	MVM_HAL.SetInputValve(0);         // close PV-1 //duplicate?
+	MVM_HAL.SetOutputValve(true);     // open PV-2
 	MVM_HAL.delay_ms(3000);
 
 	MVM_HAL.dbg.DbgPrint(DBG_CODE, DBG_INFO, "Calibrating pressure sensors. Idraulic circuit must be opened");
-	float pzero1 = MVM_HAL.ZeroPressureSensor(PS_LOOP);
+	float pzero1 = MVM_HAL.ZeroPressureSensor(PS_LOOP);      // take average over 50 measurements and set as ZERO
 	float pzero2 = MVM_HAL.ZeroPressureSensor(PS_PATIENT);
 	float pzero3 = MVM_HAL.ZeroPressureSensor(PS_VENTURI);
 	MVM_HAL.dbg.DbgPrint(DBG_CODE, DBG_INFO, "ZERO -> PLOOP: " + String(pzero1) + " PPATIENT: " + String(pzero2) + " PVENTURI: " + String(pzero3));
-	MVM_HAL.SetOutputValve(false);
+	MVM_HAL.SetOutputValve(false);    // close PV-2
 
 	last_debug_console_log = MVM_HAL.GetMillis();
 	last_alarm_CT = MVM_HAL.GetMillis();
 	alarm_enable = false;
 }
+
 void MVMCore::Tick()
 {
 	MVM_HAL.Tick();
@@ -88,10 +89,10 @@ void MVMCore::Tick()
 		}
 	}
 
-	if (MVM_HAL.Get_dT_millis(last_alarm_CT) > 5000)
+	if (MVM_HAL.Get_dT_millis(last_alarm_CT) > 5000) // Only after 5 s from last alarm?? But last_alarm_CT is only recode time in Init()...
 	{
 		alarm_enable = true;
-		
+
 	}
 	
 	if (alarm_enable)
@@ -123,7 +124,7 @@ String MVMCore::GetParameter(String p)
 }
 
 void MVMCore::PLoop_Event()
-{
+{ // Called in HAL::Tick()
 	float v = MVM_HAL.GetPressureValve(0);
 
 	//SAFETY
@@ -133,13 +134,14 @@ void MVMCore::PLoop_Event()
 	}
 
 }
+
 void MVMCore::PPatient_Event()
 {
 	float v = MVM_HAL.GetPressurePatient(0);
 	sys_s.pPatient_low_passed = 0.90 * sys_s.pPatient_low_passed + v * 0.1;
 	sys_s.pres_peak = sys_s.pPatient_low_passed > sys_s.pres_peak ?
 							sys_s.pPatient_low_passed : sys_s.pres_peak;
-	MEM_Ppatient_LP->PushData(sys_s.pPatient_low_passed);
+	MEM_Ppatient_LP->PushData(sys_s.pPatient_low_passed);    // add data to buffer
 
 	sys_s.PPatient_delta = v - MEM_Ppatient_LP->GetData(5);
 	sys_s.PPatient_delta2 = sys_s.PPatient_delta - old_delta_ppatient;
@@ -270,7 +272,7 @@ void MVMCore::CalibrateOxygenSensor()
 
 bool MVMCore::FlushPipes(bool run, float valve_percent)
 {
-	if (!CMC.core_config.run)
+	if (!CMC.core_config.run) // make sure ventilation is not started
 	{
 		MVM_HAL.FlushPipes(run, valve_percent);
 		flush_pipe_mode = run;

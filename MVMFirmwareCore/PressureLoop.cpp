@@ -141,7 +141,7 @@ void PressureLoopClass::PID_FAST_LOOP()
         if (_Pset == 0)
             _ValvePWM = 0;
         else
-            _ValvePWM =  pid_outb*100.0/4095;
+            _ValvePWM =  pid_outb*100.0/4095; // set value for valve. ledcWrite(PWM_PV1, _ValvePWM);
     }
 
    
@@ -179,7 +179,7 @@ void PressureLoopClass::Tick()
 }
 
 void PressureLoopClass::SetPressure(t_pressure_selector ps, float pressure)
-{
+{ // Set current pressure value
     if (ps == PRESSURE_VALVE)
     {
         _pressure_valve = pressure;

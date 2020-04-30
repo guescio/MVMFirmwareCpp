@@ -18,31 +18,31 @@
 void HAL::Init()
 {
 
-	hwi.Init();
-	dbg.Init(DBG_WARNING, &hwi);
+	hwi.Init();                                        //HW_V4::Init() defined in fw_board_ni_v4.cpp. Establish connections between sensors.
+	dbg.Init(DBG_WARNING, &hwi);                       //DebugIfaceClass
 	_dc.hwi = &hwi;
 	_dc.dbg = &dbg;
 	
-	drv_FlowIn.Init(IIC_FLOW1, &_dc);
+	drv_FlowIn.Init(IIC_FLOW1, &_dc);                              //SensorSFM3019::Init() defined in driver_SFM3019.cpp. IIC_FLOW1 is in generic_definitions.h
 
-	drv_PLoop.Init(IIC_PS_0, PLOOP_MODEL, OVS_1024, &_dc);
-	drv_PPatient.Init(IIC_PS_1, PPATIENT_MODEL, OVS_1024, &_dc);
-	drv_PVenturi.Init(IIC_PS_2, PVENTURI, OVS_1024, &_dc);
-	drv_FlowVenturi.Init(ALPE_1551);
+	drv_PLoop.Init(IIC_PS_0, PLOOP_MODEL, OVS_1024, &_dc);          // PLOOP_MODEL, PPATIENT_MODEL, and PVENTURI are defined in fw_board_ni_v4.h.
+	drv_PPatient.Init(IIC_PS_1, PPATIENT_MODEL, OVS_1024, &_dc);    // IIC_PS_0, _1, and _2 are defined in generic_definitions.h t_i2cdevices.
+	drv_PVenturi.Init(IIC_PS_2, PVENTURI, OVS_1024, &_dc);          // OVS_1024 is resolution (oversampling retio)condition, defined in driver_5525DSO.h
+	drv_FlowVenturi.Init(ALPE_1551);                                // LPE_1551 is a model and defined in driver_VenturiFlowMeter.h
 
-	PressureLoop.Init(5, 2, &_dc);
+	PressureLoop.Init(5, 2, &_dc);                                  // (float fast_ms, int32_t LoopRatio, void* handle)// fast_ms is time span PID control is working. LoopRatio is a ratio of number of loops of fast to slow.
 	drv_ADC0.Init(IIC_ADC_0, &_dc);
 	drv_OxygenSensor.Init(OxygenSensorA, &_dc);
-	drv_ADC0.setGain(GAIN_ONE);
+	drv_ADC0.setGain(GAIN_ONE);                                     // GAIN_ONE is defined in driver_ADS1115.h
 
-	MEM_PLoop = new CircularBuffer(4);
+	MEM_PLoop = new CircularBuffer(4);                              // buffer of size 4. store 4 measurements
 	MEM_PPatient = new CircularBuffer(16);
 	MEM_FlowIn = new CircularBuffer(4);
 	MEM_FlowVenturi = new CircularBuffer(4);
 	MEM_PVenturi = new CircularBuffer(8);
 
 	cycle_PLoop_LT = hwi.GetMillis();
-	cycle_PPatient_LT = hwi.GetMillis();
+	cycle_PPatient_LT = hwi.GetMillis();   // Why we need to call millis() many times?
 	cycle_FlowIn_LT = hwi.GetMillis();
 	cycle_PVenturi_LT = hwi.GetMillis();
 	cycle_ADC_LT = hwi.GetMillis();
@@ -92,26 +92,26 @@ void HAL::Tick()
 		hwi.PWMSet(PWM_PV1, PressureLoop.GetValveControl());
 	}
 	else
-	{
+	{   // Flush Pipe Mode
 		hwi.PWMSet(PWM_PV1, flush_pipe_open);
-		SetOutputValve(true);
+		SetOutputValve(true);  // open PV-2
 	}
 
 	
 	
-	if (hwi.Get_dT_millis(cycle_LT) >= 3)
+	if (hwi.Get_dT_millis(cycle_LT) >= 3) // Only after 3 ms from the previous HAL::Tick()
 	{
 		
 
 		if (drv_PLoop.asyncGetResult(&Ploop, &Tloop))
 		{
-			if (fabs(Ploop) < 150)
+			if (fabs(Ploop) < 150) // if pressure is less than 150 mbar
 			{
-				MEM_PLoop->PushData(Ploop);
+				MEM_PLoop->PushData(Ploop);  // Store current measurement into the buffer
 				PressureLoop.SetPressure(PRESSURE_VALVE, Ploop);
 				dbg.DbgPrint(DBG_CODE, DBG_VALUE, String((int32_t)hwi.GetMillis()) + " - Ploop: " + String(Ploop));
 				if (callback_ploop)
-					callback_ploop();
+					callback_ploop();  //MVMCore::PLoop_Event
 			}
 		}
 		else if (drv_PPatient.asyncGetResult(&Ppatient, &Tpatient))
@@ -305,19 +305,19 @@ float HAL::GetPVenturi(int32_t Delay)
 {
 	return MEM_PVenturi->GetData(Delay);
 }
-void HAL::SetInputValve(float value)
+void HAL::SetInputValve(float value)   // Set target Pressure value
 {
 	_InputValveValue = value;
 	PressureLoop.SetTargetPressure(value);
 }
-float HAL::GetInputValve()
+float HAL::GetInputValve()             // Get target Pressure value
 {
 	return 	_InputValveValue;
 }
 void HAL::SetOutputValve(bool value)
 {
 	_OutputValveValue = value ? 1:0;
-	hwi.IOSet(GPIO_PV2, !value);
+	hwi.IOSet(GPIO_PV2, !value);     //value = true->PV-2 OPEN, value - false -> PV-2 CLOSE
 }
 float HAL::GetOutputValve()
 {

@@ -386,7 +386,7 @@ SfmConfig SensorSFM3019::sfm3019_create(void) {
 
 
 
-bool SensorSFM3019::Init(t_i2cdevices device, void* hw_handle)
+bool SensorSFM3019::Init(t_i2cdevices device, void* hw_handle) //t_i2cdevices is in generic_definitions.h .
 {
 
     DriverContext* dc;

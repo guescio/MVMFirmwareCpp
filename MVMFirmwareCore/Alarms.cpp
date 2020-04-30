@@ -22,10 +22,10 @@ void AlarmClass::Tick()
 {
     CheckStaticAlarms();
 
-    ALARM_FLAG_FILTERED = ALARM_FLAG & (~ALARM_FLAG_SNOOZE);
+    ALARM_FLAG_FILTERED = ALARM_FLAG & (~ALARM_FLAG_SNOOZE);  // remove snoozed alarm bits
 
-    if (_HAL->Get_dT_millis(ALARM_FLAG_SNOOZE_millis) > 120000)
-        ALARM_FLAG_SNOOZE = 0;
+    if (_HAL->Get_dT_millis(ALARM_FLAG_SNOOZE_millis) > 120000) // 2 min after ResetAlarm()
+        ALARM_FLAG_SNOOZE = 0;                                  // snoozing off
 
     if (ALARM_FLAG != 0) {
         isInAlarm = true;
@@ -53,7 +53,7 @@ void AlarmClass::AlarmActions()
 {
     if (isInAlarm)
     {
-        if (_HAL->Get_dT_millis(blinker_led_time)>250)
+        if (_HAL->Get_dT_millis(blinker_led_time)>250) // 2 Hz and duty cycle 50%->pulse on width is 0.25s and off 0.25s
         {
             blinker_led_time = _HAL->GetMillis();
             led_on = led_on ? false : true;
@@ -68,7 +68,7 @@ void AlarmClass::AlarmActions()
         _HAL->SetAlarmRele(false);
     }
 }
-void AlarmClass::Sound()
+void AlarmClass::Sound()  // Alarm number of pulses in a burst, time span and duration of pulses are defined in EN 60601-8
 {
 	if (AlarmSound)
 	{
@@ -247,23 +247,23 @@ void AlarmClass::Sound()
 void AlarmClass::Action_OverPressureSecurity()
 {
 	_sys_c->in_over_pressure_emergency = true;
-	_HAL->SetOutputValve(true);
+	_HAL->SetOutputValve(true); // open PV-2
 }
 
 void AlarmClass::CheckStaticAlarms()
 {
-    if ((_sys_c->currentBatteryCharge < 20) && (_sys_c->batteryPowered))
+    if ((_sys_c->currentBatteryCharge < 20) && (_sys_c->batteryPowered))  // is 20%??? Need unit
     {
         TriggerAlarm(BATTERY_LOW);
     }
 
     
-    if (_sys_c->pPatient > 50)
+    if (_sys_c->pPatient > 50)  // mbar? Need unit
     {
         TriggerAlarm(ALARM_PRESSURE_INSIDE_TOO_HIGH);
     }
 
-    if (_sys_c->pLoop > 65)
+    if (_sys_c->pLoop > 65)   // mbar? Need unit
     {
         TriggerAlarm(ALARM_PRESSURE_INSIDE_TOO_HIGH);
     }
@@ -271,7 +271,7 @@ void AlarmClass::CheckStaticAlarms()
 
     if (wdog_enable)
     {
-        if (_HAL->Get_dT_millis(wdog_timer)>6000)
+        if (_HAL->Get_dT_millis(wdog_timer)>6000)   // ms
         {
             TriggerAlarm(ALARM_GUI_WDOG);
         }
@@ -384,7 +384,7 @@ void AlarmClass::TriggerAlarm(t_ALARM Alarm)
     
 }
 
-void AlarmClass::SetAlarmGUI(bool in_alarm)
+void AlarmClass::SetAlarmGUI(bool in_alarm) // Called in ConfigManager, which receives commands from GUI
 {
     if (in_alarm)
     {
@@ -392,14 +392,14 @@ void AlarmClass::SetAlarmGUI(bool in_alarm)
     }
     else   
     {
-        ALARM_FLAG = ALARM_FLAG & (~GenerateFlag(__ERROR_ALARM_PI));
+        ALARM_FLAG = ALARM_FLAG & (~GenerateFlag(__ERROR_ALARM_PI)); // take out GUI alarm bit
     }
 
 }
 
 void AlarmClass::ResetAlarm()
 {
-    ALARM_FLAG_SNOOZE = ALARM_FLAG ;
+    ALARM_FLAG_SNOOZE = ALARM_FLAG ;                  // Only Snoozing??
     ALARM_FLAG_SNOOZE_millis = _HAL->GetMillis();
 }
 

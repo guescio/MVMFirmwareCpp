@@ -236,6 +236,7 @@ bool ConfigManagerClass::SetParameter(String p, String v)
         core_config.pcv_trigger_enable = numberValue ? true : false;
         Serial.println("valore=OK");
     }
+
     if (strPatam == "pcv_trigger") {
         float numberValue = v.toFloat();
         core_config.pcv_trigger = numberValue;
@@ -272,7 +273,7 @@ bool ConfigManagerClass::SetParameter(String p, String v)
     if (strPatam == "flush_pipe") {
         float numberValue = v.toFloat();
         bool enable = numberValue < 1 ? false:true;
-        ((MVMCore*)core)->FlushPipes(enable, numberValue);
+        ((MVMCore*)core)->FlushPipes(enable, numberValue); // return value is not caught here.
         bres = true;
     }
     
@@ -284,6 +285,7 @@ bool ConfigManagerClass::SetParameter(String p, String v)
 
     return bres;
 }
+
 String ConfigManagerClass::GetParameter(String p)
 {
     if (callback_BeforeConfigurationGet)

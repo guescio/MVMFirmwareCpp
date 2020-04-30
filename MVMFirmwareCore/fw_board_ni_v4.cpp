@@ -14,29 +14,29 @@
 #define BUZZER				21
 #define ALARM_LED			17
 #define ALARM_RELE			A12
-#define BREETHE				4
+#define BREETHE				4                // LED for Breath?? PV-1 Open -> lights ON, PV-2 Open -> lights OFF
 
 #define TCAADDR 0x70
 
 
 bool HW_V4::Init()
 {
-	Serial.begin(115200);
+	Serial.begin(115200);               // Start comunication between ESP32 and Raspberry Pi with 115200 bit per second// https://www.arduino.cc/reference/en/language/functions/communication/serial/begin/
 
 
-	ledcSetup(0, 10000, 12);
-	ledcAttachPin(VALVE_IN_PIN, 0);
-	ledcWrite(0, 0);
+	ledcSetup(0, 10000, 12);            // PWM chan., frequency, duty cycle resolution (12bit = 4096 lvels)
+	ledcAttachPin(VALVE_IN_PIN, 0);     // VALVE_IN_PIN is where valve is connected. 0 is the channel (PWM chan.) creating control signal. It has to match the PWM channel set in ledcSetup.
+	ledcWrite(0, 0);                    // set the PWM channel 0 to 0 out of 4096 levels
 
-	digitalWrite(VALVE_OUT_PIN, LOW);
+	digitalWrite(VALVE_OUT_PIN, LOW);   // set this VALVE_OUT_PIN off.  https://www.arduino.cc/reference/en/language/functions/digital-io/digitalwrite/
 	digitalWrite(ALARM_LED, LOW);
 	digitalWrite(BUZZER, LOW);
 
-	pinMode(VALVE_OUT_PIN, OUTPUT);
-	pinMode(ALARM_LED, OUTPUT);
+	pinMode(VALVE_OUT_PIN, OUTPUT);     // sets the digital pin (VALVE_OUT_PIN) as output //https://www.arduino.cc/en/Reference.PinMode
+	pinMode(ALARM_LED, OUTPUT);         // sets the digital pin (ALARM_LED) as output
 	pinMode(BUZZER, OUTPUT);
 
-	Wire.begin();
+	Wire.begin();                       //https://www.arduino.cc/en/Reference/WireBegin
 
 	for (int i = 0; i < 8; i++) {
 		i2c_MuxSelect(i);
@@ -97,10 +97,10 @@ bool HW_V4::I2CWrite(t_i2cdevices device, uint8_t* wbuffer, int wlength, bool st
 	address = dev.address;
 	i2c_MuxSelect(dev.muxport);
 
-	Wire.beginTransmission(address);
+	Wire.beginTransmission(address); // https://www.arduino.cc/en/Reference/WireBeginTransmission
 	for (int i = 0;i < wlength; i++)
-		Wire.write(wbuffer[i]);
-	result = Wire.endTransmission();
+		Wire.write(wbuffer[i]);      // https://www.arduino.cc/en/Reference/WireWrite
+	result = Wire.endTransmission(); // https://www.arduino.cc/en/Reference/WireEndTransmission
 
 	if (result != 0)
 		return false;
@@ -143,7 +143,7 @@ bool HW_V4::I2CRead(t_i2cdevices device, uint8_t* rbuffer, int rlength, bool sto
 	address = dev.address;
 	i2c_MuxSelect(dev.muxport);
 
-	count = Wire.requestFrom((uint16_t)address, (uint8_t)rlength, stop);
+	count = Wire.requestFrom((uint16_t)address, (uint8_t)rlength, stop); // https://www.arduino.cc/en/Reference/WireRequestFrom
 
 	if (count < rlength)
 		return false;
@@ -156,6 +156,7 @@ bool HW_V4::I2CRead(t_i2cdevices device, uint8_t* rbuffer, int rlength, bool sto
 
 	return true;
 }
+
 bool HW_V4::PWMSet(hw_pwm id, float value)
 {
 
@@ -180,7 +181,7 @@ bool HW_V4::IOSet(hw_gpio id, bool value)
 	switch (id)
 	{
 	case GPIO_PV2:
-		digitalWrite(VALVE_OUT_PIN, value ? HIGH : LOW);
+		digitalWrite(VALVE_OUT_PIN, value ? HIGH : LOW);  //HIGH-> PV-2 Close, LOW->PV-2 Open
 		if (value==LOW)
 			digitalWrite(BREETHE, LOW);
 		break;
@@ -329,8 +330,8 @@ void HW_V4::__service_i2c_detect()
 }
 
 
-void HW_V4::i2c_MuxSelect(uint8_t i)
-{
+void HW_V4::i2c_MuxSelect(uint8_t i) // https://learn.adafruit.com/adafruit-tca9548a-1-to-8-i2c-multiplexer-breakout/wiring-and-test
+{  // What is this function for??? //Move i2c multiplexer to the current position. If mux is already in the correct position, the delay doesn't happen.
 	if (i > 7)
 		return;
 
