@@ -2,7 +2,7 @@
 name: Change request
 about: Description of the change request.
 title: ''
-labels: change request, pending review
+labels: change request, pending review, medium priority
 assignees: ''
 
 ---
