@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+<!-- remember to add labels -->
+
 **Summary**
 A clear and concise description of what the change is. To be used in the title.
 
@@ -36,15 +38,13 @@ For example, "Ventilation modes", "Alarms" or "Communication with GUI".
 ---
 
 **Proposal**
-Change description details.
+Change description details. May use checkboxes to track progress.
 
 **Working groups affected**
 "Firmware", "GUI" or "Drivers".
 
 **Classification**
-- [ ] Important to patient safety?
-- [ ] Important to security?
-- [ ] Regulatory requirement?
+"Important to patient safety", "Important to security" or "Regulatory requirement".
 
 **Safety impact analysis**
 
