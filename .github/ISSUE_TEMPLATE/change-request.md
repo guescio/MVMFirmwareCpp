@@ -1,6 +1,6 @@
 ---
 name: Change request
-about: Description of the change request.
+about: Use this template whether it is for a bug, a new feature or a requirement.
 title: ''
 labels: change request, medium priority, pending review
 assignees: ''
