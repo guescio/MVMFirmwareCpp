@@ -2,45 +2,60 @@
 name: Change request
 about: Description of the change request.
 title: ''
-labels: change request, pending review, medium priority
+labels: change request, medium priority, pending review
 assignees: ''
 
 ---
 
 **Summary**
+A clear and concise description of what the change is. To be used in the title.
 
 **Priority**
-Low/medium/high.
+"Hight", "Medium" or "Low".
 
-**Relevant groups**
+**Type**
+For example, "Top-Level Requirement", "Requirement for the FDA approval", or "Feature suggested by a doctor" etc.
 
+**Raised by**
+ Who raised this problem/change and when?
 
 ---
 
 **Problem description**
+Detailed descriptions of the problem.
 
 **How was this found?**
 
-**Change request references**
 
+**Change request references**
+For example, a link to a DocDB entry for this Change Request.
+
+**Affected system**
+For example, "Ventilation modes", "Alarms" or "Communication with GUI".
 
 ---
 
 **Proposal**
+Change description details.
 
 **Working groups affected**
+"Firmware", "GUI" or "Drivers".
 
 **Classification**
-Important to patient safety/regulatory requirement.
+- [ ] Important to patient safety?
+- [ ] Important to security?
+- [ ] Regulatory requirement?
 
 **Safety impact analysis**
 
-**Documentation impact analysis**
 
+**Documentation impact analysis**
+The identifier or a link to the impact analysis document.
 
 ---
 
 **Reviewed by**
+
 
 **Review**
 
@@ -49,12 +64,14 @@ Important to patient safety/regulatory requirement.
 
 **Implementers**
 
+
 **Change description**
 
 
 ---
 
-**Validate by**
+**Validated by**
+
 
 **Validation**
 
@@ -62,5 +79,6 @@ Important to patient safety/regulatory requirement.
 ---
 
 **Closed by**
+
 
 **Closure comment**
