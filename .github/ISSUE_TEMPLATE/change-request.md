@@ -7,7 +7,8 @@ assignees: ''
 
 ---
 
-<!-- remember to add labels -->
+<!-- Read the instructions: https://github.com/guescio/MVMFirmwareCpp/blob/master/.github/contributing.md -->
+<!-- Remember to add labels and select a project. -->
 
 **Summary**
 A clear and concise description of what the change is. To be used in the title.
