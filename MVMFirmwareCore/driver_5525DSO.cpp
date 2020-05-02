@@ -319,7 +319,7 @@ bool Sensor5525DSO::Reset_5525DSO()
     uint8_t wbuffer[6];
 
     //Read raw pressure
-    wbuffer[0] = 0x1E; // reset command
+    wbuffer[0] = 0x1E; // reset command defined in the data specification documment for MS5525DSO
     bres = hwi->I2CWrite(i2c_device, wbuffer, 1, true);
     if (!bres) return false;
 
